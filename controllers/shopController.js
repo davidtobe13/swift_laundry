@@ -2,8 +2,12 @@ const shopModel = require("../models/shopModel")
 require("dotenv").config()
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
+const dynamicHtml = require("../helpers/html")
+const { sendEmail } = require("../helpers/email")
+const { resetFunc } = require("../helpers/resetHTML")
+const port = process.env.PORT 
 
-exports.registershop = async(req,res)=>{
+exports.registerShop = async(req,res)=>{
     try {
 
         // get the requirement for the registration
@@ -36,14 +40,15 @@ exports.registershop = async(req,res)=>{
 
         // generate a token for the shop 
         const token = jwt.sign({
-            userId:shopModel._id,
-            email:shopModel.email,
-        },process.env.JWT_KEY,{expiresIn:"7d"})
+            userId:newshop._id,
+            email:newshop.email,
+            businessName: newshop.businessName
+        },process.env.JWT_KEY,{expiresIn:"6000s"})
 
-            const link = `http://localhost:${port}/verify-user/${shopModel.id}/${token}`
-            const html = dynamicHtml(link, shopModel.firstName)
+            const link = `http://localhost:${port}/verify-shop/${newshop.id}/${token}`
+            const html = dynamicHtml(link, businessName)
             sendEmail({
-            email:shopModel.email,
+            email:newshop.email,
             subject:"Click on the button below to verify your email", 
             html
             })
@@ -51,6 +56,11 @@ exports.registershop = async(req,res)=>{
         if(!newshop){
             return res.status(400).json({
                 error:"error creating your account"
+            })
+        }
+        if(shopModel.isVerified === false){
+            return res.status(400).json({
+                error: 'Unable to create this user'
             })
         }
         // success message
@@ -69,10 +79,11 @@ exports.verify = async (req,res)=>{
     try{
        
           const  id = req.params.id
-          const userToken = req.params.userToken
-       
-       const updatedUser = await myModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
-       await jwt.verify(userToken, process.env.secret )
+          const token = req.params.token
+          
+          await jwt.verify(token, process.env.JWT_KEY )
+
+       const updatedUser = await shopModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
    
        res.status(200).json({
            message:`user with emmail:${updatedUser.email} is now verified`,
@@ -85,7 +96,7 @@ exports.verify = async (req,res)=>{
     }
    
    }
-exports.signIn = async(req,res)=>{
+exports.signInShop = async(req,res)=>{
     try {
 
         // get the requirement
@@ -151,3 +162,75 @@ exports.signOut = async(req,res)=>{
         })
     }
 }
+
+//Function for the user incase password is forgotten
+exports.forgotShopPassword = async (req, res) => {
+    try {
+        const checkShop = await shopModel.findOne({ email: req.body.email });
+        if (!checkShop) {
+            return res.status(404).json({
+                message: 'Email does not exist'
+            });
+        }
+        else {
+            const subject = 'Kindly reset your password'
+            const link = `http://localhost:${port}/shop-reset/${checkShop.id}`
+            const html = resetFunc(checkShop.businessName, link)
+            sendEmail({
+                email: checkShop.email,
+                html,
+                subject
+            })
+            return res.status(200).json({
+                message: "Kindly check your email to reset your password",
+            })
+        }
+    }catch(err){
+        res.status(500).json({
+            error: err.message
+        })
+    }
+    }
+
+//Funtion to send the reset Password page to the server
+exports.resetShopPasswordPage = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const resetPage = resetFunc(id);
+
+        // Send the HTML page as a response to the user
+        res.send(resetPage);
+    }catch(err){
+        res.status(500).json({
+            error: err.message
+        })
+    }
+    }
+
+
+
+//Function to reset the user password
+exports.resetShopPassword = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const password = req.body.password;
+
+        if (!password) {
+            return res.status(400).json({
+                message: "Password cannot be empty",
+            });
+        }
+
+        const salt = bcrypt.genSaltSync(12);
+        const hashPassword = bcrypt.hashSync(password, salt);
+
+        const reset = await shopModel.findByIdAndUpdate(id, { password: hashPassword }, { new: true });
+        return res.status(200).json({
+            message: "Password reset successfully",
+        });
+    }catch(err){
+        res.status(500).json({
+            error: err.message
+        }) 
+    }
+    }

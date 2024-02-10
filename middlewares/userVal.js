@@ -1,17 +1,18 @@
 const Joi = require('@hapi/joi');
 
-const myValidation = (req,res,next)=>{
+const userValidation = (req,res,next)=>{
   const validation = Joi.object({
-    businessName: Joi.string().min(3).max(30).required().messages({
+    firstName: Joi.string().min(3).max(30).required().messages({
         'string.base': 'First name must be a string',
         'string.empty': 'First name is required',
         'string.min': 'First name must be at least {#limit} characters long',
         'string.max': 'First name cannot be longer than {#limit} characters',
       }),
-    address: Joi.string().min(3).max(50).required().messages({
-        'string.empty': 'Address is required',
-        'string.min': 'Address must be at least {#limit} characters long',
-        'string.max': 'Address cannot be longer than {#limit} characters',
+    lastName: Joi.string().min(3).max(30).required().messages({
+        'string.base': 'Last name must be a string',
+        'string.empty': 'Last name is required',
+        'string.min': 'Last name must be at least {#limit} characters long',
+        'string.max': 'Last name cannot be longer than {#limit} characters',
       }),
     email: Joi.string().email().required().messages({
         'string.base': 'Email must be a string',
@@ -23,7 +24,12 @@ const myValidation = (req,res,next)=>{
         'string.empty': 'Phone number is required',
         'string.pattern.base': 'Phone number must be a valid 11-digit number',
       }),
-    password: Joi.string().required().min(8).max(30).messages({
+    Pin: Joi.string().pattern(new RegExp('^[0-9]{4}$')).required().messages({
+        'string.base': 'TransferPin must be a string',
+        'string.empty': 'TransferPin is required',
+        'string.pattern.base': 'TransferPin must be a valid 4-digit number',
+      }),
+    password: Joi.string().required().min(8).max(16).messages({
         'string.base': 'Password must be a string',
         'string.empty': 'Password is required',
         'string.min': 'Password must be min of 8 characters',
@@ -31,8 +37,8 @@ const myValidation = (req,res,next)=>{
       }),
   
   });
-  const {businessName,address,email,phoneNumber,password} = req.body
-  const {error} = validation.validate({businessName,address,email,phoneNumber,password}, {abortEarly:false})
+  const {firstName,lastName,email,phoneNumber,password,Pin} = req.body
+  const {error} = validation.validate({firstName,lastName,email,phoneNumber,password,Pin}, {abortEarly:false})
   if(error){
     return res.status(400).json({
       error:error.message
@@ -41,4 +47,4 @@ const myValidation = (req,res,next)=>{
   next()
 }
 
-module.exports = myValidation
+module.exports = userValidation
