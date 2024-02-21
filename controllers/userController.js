@@ -2,6 +2,7 @@ const userModel = require("../models/userModel")
 require("dotenv").config()
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
+const { resetFunc } = require("../helpers/resetHTML")
 
 exports.registerUser = async(req,res)=>{
     try {
@@ -118,3 +119,75 @@ exports.signOut = async(req,res)=>{
         })
     }
 }
+
+//Function for the user incase password is forgotten
+exports.forgotPassword = async (req, res) => {
+    try {
+        const checkUser = await userModel.findOne({ email: req.body.email });
+        if (!checkUser) {
+            return res.status(404).json({
+                error: 'Email does not exist'
+            });
+        }
+        else {
+            const subject = 'Kindly reset your password'
+            const link = `http://localhost:${port}/user-reset/${checkUser.id}`
+            const html = resetFunc(checkUser.fullName, link)
+            sendEmail({
+                email: checkUser.email,
+                html,
+                subject
+            })
+            return res.status(200).json({
+                message: "Kindly check your email to reset your password",
+            })
+        }
+    }catch(err){
+        res.status(500).json({
+            error: err.message
+        })
+    }
+    }
+
+//Funtion to send the reset Password page to the server
+exports.resetPasswordPage = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const resetPage = resetFunc(id);
+
+        // Send the HTML page as a response to the user
+        res.send(resetPage);
+    }catch(err){
+        res.status(500).json({
+            error: err.message
+        })
+    }
+    }
+
+
+
+//Function to reset the user password
+exports.resetPassword = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const password = req.body.password;
+
+        if (!password) {
+            return res.status(400).json({
+                error: "Password cannot be empty",
+            });
+        }
+
+        const salt = bcrypt.genSaltSync(12);
+        const hashPassword = bcrypt.hashSync(password, salt);
+
+        const reset = await userModel.findByIdAndUpdate(id, { password: hashPassword }, { new: true });
+        return res.status(200).json({
+            message: "Password reset successfully",
+        });
+    }catch(err){
+        res.status(500).json({
+            error: err.message
+        }) 
+    }
+    }

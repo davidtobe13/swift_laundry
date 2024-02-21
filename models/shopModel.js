@@ -7,7 +7,6 @@ const shopSchema = new mongoose.Schema({
     },
     address:{
         type:String,
-        required:true
     },
     email:{
         type:String,
@@ -29,7 +28,19 @@ const shopSchema = new mongoose.Schema({
     isAdmin:{
         type:Boolean,
         default:true
-    },          
+    },
+    features:{
+        type:Array,
+        default:[]
+    },
+    subscribed:{
+        type:String,
+        default:null
+    },
+    users:[{
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "user"
+    }],       
     blackList:{
         type:Array,
         default:[]

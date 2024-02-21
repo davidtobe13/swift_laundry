@@ -24,11 +24,6 @@ const userValidation = (req,res,next)=>{
         'string.empty': 'Phone number is required',
         'string.pattern.base': 'Phone number must be a valid 11-digit number',
       }),
-    Pin: Joi.string().pattern(new RegExp('^[0-9]{4}$')).required().messages({
-        'string.base': 'TransferPin must be a string',
-        'string.empty': 'TransferPin is required',
-        'string.pattern.base': 'TransferPin must be a valid 4-digit number',
-      }),
     password: Joi.string().required().min(8).max(16).messages({
         'string.base': 'Password must be a string',
         'string.empty': 'Password is required',
@@ -37,8 +32,8 @@ const userValidation = (req,res,next)=>{
       }),
   
   });
-  const {firstName,lastName,email,phoneNumber,password,Pin} = req.body
-  const {error} = validation.validate({firstName,lastName,email,phoneNumber,password,Pin}, {abortEarly:false})
+  const {firstName,lastName,email,phoneNumber,password} = req.body
+  const {error} = validation.validate({firstName,lastName,email,phoneNumber,password}, {abortEarly:false})
   if(error){
     return res.status(400).json({
       error:error.message

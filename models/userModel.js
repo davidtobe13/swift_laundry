@@ -18,10 +18,18 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    subscribed:{
+        type:String,
+        required:null
+    },       
     password:{
         type:String,
         required:true
-    },          
+    },       
+    orders:[{
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "order"
+    }],         
     blackList:{
         type:Array,
         default:[]
