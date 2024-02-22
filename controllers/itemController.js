@@ -13,6 +13,7 @@ exports.items = async(req, res)=>{
             })
         } else {
             return res.status(201).json({
+                message: "item created successfully",
                 data: items
             })
         }
