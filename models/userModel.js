@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    address:{
+        type:String,
+    },
     subscribed:{
         type:String,
         required:null
@@ -25,6 +28,9 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true
+    },
+    profileImage:{
+        type:String,
     },       
     orders:[{
         type: mongoose.SchemaTypes.ObjectId,

@@ -191,3 +191,81 @@ exports.resetPassword = async (req, res) => {
         }) 
     }
     }
+
+    // const updateUser = async (req, res) => {
+    //     const id = req.user.userId
+    //     const {
+    //         firstName,
+    //         lastName,
+    //         phoneNumber,
+    //         address,
+    //         profileImage     
+    //     } = req.body
+    //     const file = req.file.filename
+    //     const result = await cloudinary.uploader.upload(file)
+
+    //     const updateProfile = await userModel.findByIdAndUpdate(id, {profileImage: result.secure_url}, {new:true})
+
+    //     if(!updateProfile){
+    //         return res.status(403).json({
+    //             error: `Unable to update this user`
+    //         })
+    //     }
+
+    //     res.status(200).json({
+    //         message: 'Successfully updated your profile'
+    //     })
+    // }
+
+    const updateUser = async (req, res) => {
+        const id = req.user.userId;
+        const {
+            firstName,
+            lastName,
+            phoneNumber,
+            address,
+        } = req.body;
+        
+        let profileImage;
+        if (req.file) {
+            // If a file is uploaded, upload it to Cloudinary
+            const file = req.file.path;
+            const result = await cloudinary.uploader.upload(file);
+            profileImage = result.secure_url;
+        }
+    
+        // Prepare the update object with updated fields
+        const updateObject = {
+            firstName,
+            lastName,
+            phoneNumber,
+            address,
+        };
+    
+        // Add profileImage to updateObject if it exists
+        if (profileImage) {
+            updateObject.profileImage = profileImage;
+        }
+    
+        try {
+            // Update the user document in the database
+            const updatedUser = await userModel.findByIdAndUpdate(id, updateObject, { new: true });
+    
+            if (!updatedUser) {
+                return res.status(404).json({
+                    error: `User with not found`
+                });
+            }
+    
+            res.status(200).json({
+                message: 'Successfully updated your profile',
+                user: updatedUser
+            });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({
+                error: 'Internal server error'
+            });
+        }
+    };
+    

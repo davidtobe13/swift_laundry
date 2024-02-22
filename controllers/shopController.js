@@ -234,3 +234,55 @@ exports.resetShopPassword = async (req, res) => {
         }) 
     }
     }
+
+    
+    const updateShop = async (req, res) => {
+        const id = req.user.userId;
+        const {
+            businessName,
+            phoneNumber,
+            address,
+        } = req.body;
+        
+        let profileImage;
+        if (req.file) {
+            // If a file is uploaded, upload it to Cloudinary
+            const file = req.file.path;
+            const result = await cloudinary.uploader.upload(file);
+            profileImage = result.secure_url;
+        }
+    
+        // Prepare the update object with updated fields
+        const updateObject = {
+            businessName,
+            phoneNumber,
+            address,
+        };
+    
+        // Add profileImage to updateObject if it exists
+        if (profileImage) {
+            updateObject.profileImage = profileImage;
+        }
+    
+        try {
+            // Update the user document in the database
+            const updatedShop = await shopModel.findByIdAndUpdate(id, updateObject, { new: true });
+    
+            if (!updatedShop) {
+                return res.status(404).json({
+                    error: `Shop with not found`
+                });
+            }
+    
+            res.status(200).json({
+                message: 'Successfully updated your profile',
+                data: updatedShop
+            });
+        } catch (error) {
+            console.error('Error updating shop:', error);
+            res.status(500).json({
+                error: 'Internal server error'
+            });
+        }
+    };
+    
