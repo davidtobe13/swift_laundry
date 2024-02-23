@@ -11,7 +11,7 @@ router.post("/register-User", userValidation,registerUser)
 router.get("/verify-User/:id/:token", verifyUser)
 router.post("/sign-In",signIn)
 router.post("/sign-Out",authenticate ,signOut)
-router.get("/forget-Password" ,forgotPassword)``
+router.get("/forget-Password" ,forgotPassword)
 router.get("/reset-Password-Page/:id", resetPasswordPage)
 router.put("/reset-Password/:id", resetPassword)
 router.put("/update-User/:id", upload.single("profileImage"),authenticate, updateUser)
