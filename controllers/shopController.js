@@ -237,7 +237,7 @@ exports.resetShopPassword = async (req, res) => {
 
     
 exports.updateShop = async (req, res) => {
-        const id = req.user.userId;
+        const userId = req.user.userId;
         const {
             businessName,
             phoneNumber,
@@ -266,7 +266,7 @@ exports.updateShop = async (req, res) => {
     
         try {
             // Update the user document in the database
-            const updatedShop = await shopModel.findByIdAndUpdate(id, updateObject, { new: true });
+            const updatedShop = await shopModel.findByIdAndUpdate(userId, updateObject, { new: true });
     
             if (!updatedShop) {
                 return res.status(404).json({
@@ -451,14 +451,14 @@ exports.getAllUsers = async (req, res) => {
 // User subscription
 exports.shopSilverPlan = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const userId = req.user.userId;
         // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(shopId);
+        const shop = await shopModel.findById(userId);
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }
         const silver = user.subscribed
-        const subscribe = await userModel.findByIdAndUpdate(shopId, {silver:'silver'}, {new: true});
+        const subscribe = await userModel.findByIdAndUpdate(userId, {silver:'silver'}, {new: true});
 
         if(!subscribe){
             return res.status(403).json({
@@ -479,17 +479,17 @@ exports.shopSilverPlan = async (req, res) => {
 
 
 // User subscription
-exports.userGoldPlan = async (req, res) => {
+exports.shopGoldPlan = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const userId = req.user.userId;
 
         // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(shopId);
+        const shop = await shopModel.findById(userId);
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }
         const gold = user.subscribed
-        const subscribe = await userModel.findByIdAndUpdate(shopId, {gold:'gold'}, {new: true});
+        const subscribe = await userModel.findByIdAndUpdate(userId, {gold:'gold'}, {new: true});
 
         if(!subscribe){
             return res.status(403).json({
@@ -538,4 +538,5 @@ exports.updateOrderStatusToCompleted = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 

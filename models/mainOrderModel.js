@@ -22,7 +22,11 @@ const mainOrderSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: "shop"
     },
-})
+    date: {
+        type: Date,
+        default: Date.now
+    }
+});
 
 const mainOrderModel = mongoose.model("mainorder", mainOrderSchema)
 

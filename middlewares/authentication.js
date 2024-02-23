@@ -1,44 +1,103 @@
-const regModel = require("../models/userModel")
-const jwt = require("jsonwebtoken")
-require('dotenv').config()
+// const regModel = require("../models/userModel")
+// const jwt = require("jsonwebtoken")
+// require('dotenv').config()
 
-const authenticate = async(req,res,next)=>{
+// const authenticate = async(req,res,next)=>{
+//     try {
+
+//         // get the token and split it from the bearer
+//         const token = req.headers.authorization.split(" ")[1]
+//         if (!token) {
+//             return res.status(404).json({
+//                 error:"Authorization failed: token not found"
+//             })
+//         }
+//         // check the validity of the token
+//         const decodeToken = jwt.verify(token,process.env.JWT_KEY)
+//         // get the user with the token
+//         const user = await regModel.findById(decodeToken.userId)
+//         if (!user) {
+//             return res.status(404).json({
+//                 error:"this user does not exist in this platform"
+//             })
+//         }
+//         if (user.blackList.includes(token)) {
+//             return res.status(400).json({
+//                 error:"user loggedOut"
+//             })
+//         }
+//         req.user = decodeToken
+//         next()
+        
+//     } catch (error) {
+//         if (error instanceof jwt.JsonWebTokenError) {
+//             return res.status(400).json({
+//                 error:"session TimeOut"
+//             })
+//         }
+//         res.status(500).json({
+//             error:error.message
+//         })
+//     }
+// }
+
+// module.exports = authenticate
+
+
+const userModel = require("../models/userModel");
+const shopModel = require("../models/shopModel");
+const jwt = require("jsonwebtoken");
+require('dotenv').config();
+
+const authenticate = async (req, res, next) => {
     try {
-
-        // get the token and split it from the bearer
-        const token = req.headers.authorization.split(" ")[1]
+        // Get the token and split it from the bearer
+        const token = req.headers.authorization.split(" ")[1];
         if (!token) {
             return res.status(404).json({
-                error:"Authorization failed: token not found"
-            })
+                error: "Authorization failed: token not found"
+            });
         }
-        // check the validity of the token
-        const decodeToken = jwt.verify(token,process.env.JWT_KEY)
-        // get the user with the token
-        const user = await regModel.findById(decodeToken.userId)
+        // Check the validity of the token
+        const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+        // Find user by ID in userModel
+        let user = await userModel.findById(decodedToken.userId);
+        if (!user) {
+            // If not found, find in shopModel
+            user = await shopModel.findById(decodedToken.userId);
+        }
         if (!user) {
             return res.status(404).json({
-                error:"this user does not exist in this platform"
-            })
+                error: "User not found"
+            });
         }
+        // Check if the token is blacklisted
         if (user.blackList.includes(token)) {
             return res.status(400).json({
-                error:"user loggedOut"
-            })
+                error: "User logged out"
+            });
         }
-        req.user = decodeToken
-        next()
+        // Store the user object in the request object
+        req.user = decodedToken;
         
+        // Check if the user is an admin
+        if (user.isAdmin) {
+            req.isAdmin = true;
+        } else {
+            req.isAdmin = false;
+        }
+
+        next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {
             return res.status(400).json({
-                error:"session TimeOut"
-            })
+                error: "Session Timeout"
+            });
         }
         res.status(500).json({
-            error:error.message
-        })
+            error: error.message
+        });
     }
-}
+};
 
-module.exports = authenticate
+module.exports = authenticate;
