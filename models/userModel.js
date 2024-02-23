@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema({
     },
     subscribed:{
         type:String,
-        required:null
+        default:null,
+        enum: ['silver', 'gold']
     },       
     password:{
         type:String,
@@ -34,7 +35,7 @@ const userSchema = new mongoose.Schema({
     },       
     orders:[{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: "order"
+        ref: "mainorder"
     }],         
     blackList:{
         type:Array,

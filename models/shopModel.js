@@ -35,7 +35,8 @@ const shopSchema = new mongoose.Schema({
     },
     subscribed:{
         type:String,
-        default:null
+        default:null,
+        enum: ['silver', 'gold']
     },
     profileImage:{
         type:String,

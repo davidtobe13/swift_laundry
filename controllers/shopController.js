@@ -75,7 +75,7 @@ exports.registerShop = async(req,res)=>{
         })
     }
 }
-exports.verify = async (req,res)=>{
+exports.verifyShop = async (req,res)=>{
     try{
        
           const  id = req.params.id
@@ -134,7 +134,7 @@ exports.signInShop = async(req,res)=>{
     }
 }
 
-exports.signOut = async(req,res)=>{
+exports.signOutShop = async(req,res)=>{
     try {
 
         // get the shops token
@@ -236,7 +236,7 @@ exports.resetShopPassword = async (req, res) => {
     }
 
     
-    const updateShop = async (req, res) => {
+exports.updateShop = async (req, res) => {
         const id = req.user.userId;
         const {
             businessName,
@@ -286,3 +286,256 @@ exports.resetShopPassword = async (req, res) => {
         }
     };
     
+
+    
+    exports.getShopOrders = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+        
+        // Find the shop by its ID
+        const shop = await shopModel.findById(shopId).populate('users');
+
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        // Initialize an array to store all orders in the shop
+        const shopOrders = [];
+
+        // Iterate through each user in the shop
+        for (const user of shop.users) {
+            // Push each user's orders to the shopOrders array
+            shopOrders.push(...user.orders);
+        }
+
+        res.status(200).json({
+            message: `List of orders made in the shop`,
+            data: shopOrders
+        });
+    } catch (error) {
+        console.error('Error getting shop orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+exports.getShopPendingOrders = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+        
+        // Find the shop by its ID
+        const shop = await shopModel.findById(shopId).populate('users');
+
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        // Initialize an array to store pending orders in the shop
+        const pendingOrders = [];
+
+        // Iterate through each user in the shop
+        for (const user of shop.users) {
+            // Filter each user's orders to include only pending orders
+            const userPendingOrders = user.orders.filter(order => order.status === 'pending');
+            // Push filtered pending orders to the pendingOrders array
+            pendingOrders.push(...userPendingOrders);
+        }
+
+        if(pendingOrders.length === 0) {
+            return res.status(403).json({
+                error: `You do not have any pending order`
+            })
+        }
+
+        res.status(200).json({
+            message: `You have ${pendingOrders.length} pending orders made in the shop`,
+            data: pendingOrders
+        });
+    } catch (error) {
+        console.error('Error getting shop pending orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+exports.getShopCompletedOrders = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+        
+        // Find the shop by its ID
+        const shop = await shopModel.findById(shopId).populate('users');
+
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        // Initialize an array to store pending orders in the shop
+        const completedOrders = [];
+
+        // Iterate through each user in the shop
+        for (const user of shop.users) {
+            // Filter each user's orders to include only completed orders
+            const userCompletedOrders = user.orders.filter(order => order.status === 'completed');
+            // Push filtered completed orders to the completedOrders array
+            completedOrders.push(...userCompletedOrders);
+        }
+        if(completedOrders.length === 0) {
+            return res.status(403).json({
+                error: `You do not have any completed order`
+            })
+        }
+
+        res.status(200).json({
+            message: `You have ${completedOrders.length} completed orders made in the shop`,
+            data: completedOrders
+        });
+    } catch (error) {
+        console.error('Error getting shop completed orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+   
+// Get One User
+exports.getOneUser = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+        const userId = req.params.userId;
+
+        // Fetch shop by ID to ensure it exists
+        const shop = await shopModel.findById(shopId).populate('users');
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        // Find the user within the shop's users array
+        const user = shop.users.find(user => user._id.toString() === userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found in this shop' });
+        }
+
+        res.status(200).json({
+            message: 'User fetched successfully',
+            data: user
+        });
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+//Get all users
+exports.getAllUsers = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+
+        // Fetch shop by ID to ensure it exists
+        const shop = await shopModel.findById(shopId).populate('users');
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        res.status(200).json({
+            message: 'All users fetched successfully',
+            data: shop.users
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+
+// User subscription
+exports.shopSilverPlan = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+        // Fetch user by ID and populate their orders
+        const shop = await shopModel.findById(shopId);
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        const silver = user.subscribed
+        const subscribe = await userModel.findByIdAndUpdate(shopId, {silver:'silver'}, {new: true});
+
+        if(!subscribe){
+            return res.status(403).json({
+                error: 'Unable to subscribe for this plan'
+            })
+        }
+        res.status(201).json({
+            message: 'You have successfully subscribed to this plan',
+            data: subscribe
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+
+// User subscription
+exports.userGoldPlan = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+
+        // Fetch user by ID and populate their orders
+        const shop = await shopModel.findById(shopId);
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        const gold = user.subscribed
+        const subscribe = await userModel.findByIdAndUpdate(shopId, {gold:'gold'}, {new: true});
+
+        if(!subscribe){
+            return res.status(403).json({
+                error: 'Unable to subscribe for this plan'
+            })
+        }
+        res.status(201).json({
+            message: 'You have successfully subscribed to this plan',
+            data: subscribe
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+exports.updateOrderStatusToCompleted = async (req, res) => {
+    try {
+        const shopId = req.params.shopId;
+        const orderId = req.params.orderId;
+
+        // Find the shop by its ID
+        const shop = await shopModel.findById(shopId).populate('users');
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        // Iterate through each user in the shop
+        for (const user of shop.users) {
+            // Find the order within the user's orders
+            const orderIndex = user.orders.findIndex(order => order._id.toString() === orderId);
+            if (orderIndex !== -1) {
+                // Update the status of the order to "completed"
+                user.orders[orderIndex].status = 'completed';
+                // Save the changes to the user
+                await user.save();
+                return res.status(200).json({ message: 'Order status updated to completed' });
+            }
+        }
+
+        // If the order is not found in any user's orders
+        return res.status(404).json({ error: 'Order not found in any user\'s orders' });
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+

@@ -3,6 +3,7 @@ require("dotenv").config()
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
 const { resetFunc } = require("../helpers/resetHTML")
+const mainOrderModel = require("../models/mainOrderModel")
 
 exports.registerUser = async(req,res)=>{
     try {
@@ -192,31 +193,6 @@ exports.resetPassword = async (req, res) => {
     }
     }
 
-    // const updateUser = async (req, res) => {
-    //     const id = req.user.userId
-    //     const {
-    //         firstName,
-    //         lastName,
-    //         phoneNumber,
-    //         address,
-    //         profileImage     
-    //     } = req.body
-    //     const file = req.file.filename
-    //     const result = await cloudinary.uploader.upload(file)
-
-    //     const updateProfile = await userModel.findByIdAndUpdate(id, {profileImage: result.secure_url}, {new:true})
-
-    //     if(!updateProfile){
-    //         return res.status(403).json({
-    //             error: `Unable to update this user`
-    //         })
-    //     }
-
-    //     res.status(200).json({
-    //         message: 'Successfully updated your profile'
-    //     })
-    // }
-
     const updateUser = async (req, res) => {
         const id = req.user.userId;
         const {
@@ -269,3 +245,239 @@ exports.resetPassword = async (req, res) => {
         }
     };
     
+    exports.getAllOrders = async (req, res) =>{
+        try{ 
+            // Find user by ID
+            const userId = req.user.userId;
+            const user = await userModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            const orders = await mainOrderModel.find().populate('order')
+
+            if(orders.length === 0){
+                return res.status(400).json({
+                    error: "no orders placed yet"
+                })
+            }
+
+            res.status(200).json({
+                message: `You have ${orders.length} orders`,
+                data: orders
+            })
+        }
+        catch(error){
+            res.status(500).json({
+                error: 'Internal server error'
+            })
+        }
+    }
+
+    exports.getAllPendingOrders = async (req, res) => {
+        try {
+            // Find user by ID
+            const userId = req.user.userId;
+            const user = await userModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+    
+            // Find pending orders
+            const pendingOrders = await mainOrderModel.find({ status: 'pending' }).populate('order');
+    
+            if (pendingOrders.length === 0) {
+                return res.status(404).json({ error: 'You have no pending orders' });
+            }
+    
+            res.status(200).json({
+                message: `You have ${pendingOrders.length} pending orders`,
+                data: pendingOrders
+            });
+        } catch (error) {
+            console.error('Error getting pending orders:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    
+
+    exports.getAllCompletedOrders = async (req, res) => {
+        try {
+            // Find user by ID
+            const userId = req.user.userId;
+            const user = await userModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+    
+            // Find completed orders
+            const completedOrders = await mainOrderModel.find({ status: 'completed' }).populate('order');
+    
+            if (completedOrders.length === 0) {
+                return res.status(404).json({ error: 'You have no completed orders' });
+            }
+    
+            res.status(200).json({
+                message: `You have ${completedOrders.length} completed orders`,
+                data: completedOrders
+            });
+        } catch (error) {
+            console.error('Error getting completed orders:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+
+
+exports.getOneOrder = async(req, res) =>{
+    try{
+        const userId = req.user.userId
+        const orderId = req.params.orderId
+
+        const user = await userModel.findById(userId)
+
+        if(!user){
+            res.status(404).json({
+                error: 'User not found'
+            })
+        }
+
+        const order = await mainOrderModel.findById(orderId).populate('order')
+        if(!order){
+            return res.status(404).json({
+                error: 'Order not found'
+            })
+        }
+
+        res.status(200).json({
+            message: 'Order fetched successfully',
+            data: order
+        })
+    }catch(error){
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+// Get One Shop
+exports.getOneShop = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const shopId = req.params.shopId;
+
+        // Fetch user by ID and populate their orders
+        const user = await userModel.findById(userId).populate("orders");
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Fetch user by ID and populate their orders
+        const shop = await shopModel.findById(shopId);
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        res.status(201).json({
+            message: 'Shop Fatched successfully',
+            data: shop
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+// Get One Shop
+exports.getAllShop = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        // Fetch user by ID and populate their orders
+        const user = await userModel.findById(userId).populate("orders");
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Fetch user by ID and populate their orders
+        const shop = await shopModel.find();
+        if (!shop) {
+            return res.status(404).json({ error: 'Shops not found' });
+        }
+        res.status(201).json({
+            message: `There are ${shop.length} shops around you`,
+            data: shop
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+// User subscription
+exports.userSilverPlan = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const shopId = req.params.shopId;
+
+        // Fetch user by ID and populate their orders
+        const user = await userModel.findById(userId).populate("orders");
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Fetch user by ID and populate their orders
+        const shop = await shopModel.findById(shopId);
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        const silver = user.subscribed
+        const subscribe = await userModel.findByIdAndUpdate(userId, {silver:'silver'}, {new: true});
+
+        if(!subscribe){
+            return res.status(403).json({
+                error: 'Unable to subscribe for this plan'
+            })
+        }
+        res.status(201).json({
+            message: 'You have successfully subscribed to this plan',
+            data: subscribe
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
+
+// User subscription
+exports.userGoldPlan = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const shopId = req.params.shopId;
+
+        // Fetch user by ID and populate their orders
+        const user = await userModel.findById(userId).populate("orders");
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Fetch user by ID and populate their orders
+        const shop = await shopModel.findById(shopId);
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        const gold = user.subscribed
+        const subscribe = await userModel.findByIdAndUpdate(userId, {gold:'gold'}, {new: true});
+
+        if(!subscribe){
+            return res.status(403).json({
+                error: 'Unable to subscribe for this plan'
+            })
+        }
+        res.status(201).json({
+            message: 'You have successfully subscribed to this plan',
+            data: subscribe
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

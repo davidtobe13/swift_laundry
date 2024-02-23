@@ -3,7 +3,8 @@ const mongoose = require("mongoose")
 const subscriptionSchema = new mongoose.Schema({
     plan:{
         type:String,
-        required:null
+        default:null,
+        enum: ['silver', 'gold']
     },
     user:{
         type: mongoose.SchemaTypes.ObjectId,
