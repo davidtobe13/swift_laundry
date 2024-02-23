@@ -54,6 +54,29 @@ exports.registerUser = async(req,res)=>{
     }
 }
 
+
+exports.verifyUser = async (req,res)=>{
+    try{
+       
+          const  id = req.params.id
+          const token = req.params.token
+          
+          await jwt.verify(token, process.env.JWT_KEY )
+
+       const updatedUser = await userModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
+   
+       res.status(200).json({
+           message:`user with emmail:${updatedUser.email} is now verified`,
+           data: updatedUser
+       })
+    }catch(err){
+       res.status(500).json({
+           error: err.message
+       })
+    }
+   
+   }
+
 exports.signIn = async(req,res)=>{
     try {
 
