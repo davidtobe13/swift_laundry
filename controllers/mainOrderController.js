@@ -4,7 +4,7 @@ const shopModel = require('../models/shopModel');
 const userModel = require('../models/userModel');
 
 // Create a new order
-exports.createOrder = async (req, res) => {
+exports.createUserOrder = async (req, res) => {
     try {
         const userId = req.user.userId;
         const shopId = req.params.shopId;
