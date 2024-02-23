@@ -193,7 +193,7 @@ exports.resetPassword = async (req, res) => {
     }
     }
 
-    const updateUser = async (req, res) => {
+    exports.updateUser = async (req, res) => {
         const id = req.user.userId;
         const {
             firstName,
