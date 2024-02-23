@@ -75,6 +75,7 @@ exports.registerShop = async(req,res)=>{
         })
     }
 }
+
 exports.verifyShop = async (req,res)=>{
     try{
        
