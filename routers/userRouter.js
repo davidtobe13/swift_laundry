@@ -24,5 +24,4 @@ router.get("/get-All-Shop/:userId", authenticate,getAllShop)
 router.get("/user-Silver-Plan",authenticate, userSilverPlan)
 router.get("/user-Gold-Plan",authenticate, userGoldPlan)
 
-
 module.exports = router
