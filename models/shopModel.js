@@ -29,10 +29,10 @@ const shopSchema = new mongoose.Schema({
         type:Boolean,
         default:true
     },
-    features:{
-        type:Array,
-        default:[]
-    },
+    features:[{
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "features"
+    }],
     subscribed:{
         type:String,
         default:null,
