@@ -1,8 +1,5 @@
 const router = require("express").Router()
-
-const {registerUser,verifyUser, signIn,signOut,forgotPassword,resetPasswordPage,resetPassword,
-    updateUser,getAllOrders,getAllPendingOrders, getAllCompletedOrders,getOneOrder, getOneShop, getAllShop,
-    userSilverPlan, userGoldPlan} = require("../controllers/userController")
+const { registerUser, verifyUser, signIn, signOut, forgotPassword, resetPasswordPage, resetPassword, updateUser, getAllOrders, getAllPendingOrders, getAllCompletedOrders, getOneOrder, getOneShop, getAllShop, userSilverPlan, userGoldPlan } = require("../controllers/userController")
 const authenticate = require("../middlewares/authentication")
 const userValidation = require("../middlewares/userVal")
 const upload = require("../utils/multer")

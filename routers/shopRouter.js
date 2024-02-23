@@ -1,12 +1,12 @@
 const router = require("express").Router()
-const {signOut, verify, registerShop, signInShop, resetShopPasswordPage, forgotShopPassword, resetShopPassword, updateShop, getShopOrders, getShopPendingOrders, getShopCompletedOrders, getOneUser, getAllUsers, shopSilverPlan, shopGoldPlan, updateOrderStatusToCompleted} = require("../controllers/shopController")
+const {registerShop, verifyShop, signInShop, signOutShop, forgotShopPassword, resetShopPasswordPage, resetShopPassword, updateShop, getShopOrders, getShopPendingOrders, getShopCompletedOrders, getOneUser, getAllUsers, shopSilverPlan, shopGoldPlan, updateOrderStatusToCompleted} = require('../controllers/shopController')
 const authenticate = require("../middlewares/authentication")
 const myValidation = require("../middlewares/validation")
 
-router.post("/register-shop",myValidation,registerShop)
+router.post("/register-shop",myValidation, registerShop)
 router.post("/login-shop",signInShop)
-router.post("/logout",authenticate,signOut)
-router.get("/verify-shop/:id/:token", verify)
+router.post("/logout",authenticate,signOutShop)
+router.get("/verify-shop/:id/:token", verifyShop)
 router.post("/forgot-shop-password", forgotShopPassword)
 router.get("/shop-reset/:id", resetShopPasswordPage)
 router.post("/shop-reset-password/:id", resetShopPassword)
@@ -19,6 +19,5 @@ router.get('/get-all-users/:shopId', authenticate, getAllUsers)
 router.post('/shop-silver-plan', authenticate, shopSilverPlan)
 router.post('/shop-gold-plan', authenticate, shopGoldPlan)
 router.post('/complete-order/:shopId/:orderId', authenticate, updateOrderStatusToCompleted)
-// router.get("/allusers",authenticate,allUsers)
 
 module.exports = router
