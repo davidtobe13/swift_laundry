@@ -5,12 +5,11 @@ exports.acceptDelivery = async (req, res) => {
         const deliveryId = req.params.deliveryId;
         const userId = req.user.userId;
 
-        // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        const { deliveryDateTime } = req.body; // Extract delivery date and time from request body
+        const { deliveryDateTime } = req.body;
 
         // Find delivery by ID
         const delivery = await deliveryModel.findById(deliveryId);
@@ -21,7 +20,6 @@ exports.acceptDelivery = async (req, res) => {
         // Update delivery status to "accepted"
         delivery.status = 'accepted';
 
-        // Update delivery date and time if provided
         if (deliveryDateTime) {
             delivery.deliveryDateTime = new Date(deliveryDateTime);
         }
@@ -41,12 +39,11 @@ exports.rescheduleDelivery = async (req, res) => {
         const deliveryId = req.params.deliveryId;
         const userId = req.user.userId;
 
-        // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        const { deliveryDateTime } = req.body; // Extract delivery date and time from request body
+        const { deliveryDateTime } = req.body;
 
         // Find delivery by ID
         const delivery = await deliveryModel.findById(deliveryId);
@@ -54,10 +51,8 @@ exports.rescheduleDelivery = async (req, res) => {
             return res.status(404).json({ error: 'Delivery not found' });
         }
 
-        // Update delivery status to "rescheduled"
         delivery.status = 'rescheduled';
 
-        // Update delivery date and time if provided
         if (deliveryDateTime) {
             delivery.deliveryDateTime = new Date(deliveryDateTime);
         }
