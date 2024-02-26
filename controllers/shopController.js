@@ -86,10 +86,12 @@ exports.verifyShop = async (req,res)=>{
 
        const updatedUser = await shopModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
    
-       res.status(200).json({
-           message:`user with emmail:${updatedUser.email} is now verified`,
-           data: updatedUser
-       })
+    //    res.status(200).json({
+    //        message:`user with emmail:${updatedUser.email} is now verified`,
+    //        data: updatedUser
+    //    })
+
+        res.status(200).send('You have been verified')
     }catch(err){
        res.status(500).json({
            error: err.message
