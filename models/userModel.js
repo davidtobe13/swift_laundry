@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
     profileImage:{
         type:String,
     },
+    isVerified:{
+        type: Boolean,
+        default: false
+    },    
     isAdmin:{
         type: Boolean,
         default: false
