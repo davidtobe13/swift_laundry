@@ -236,7 +236,8 @@ exports.resetPassword = async (req, res) => {
     }
 
     exports.updateUser = async (req, res) => {
-        const id = req.user.userId;
+        const userId = req.user.userId;
+        const id = req.params.id
         const {
             firstName,
             lastName,
