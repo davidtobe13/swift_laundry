@@ -16,11 +16,11 @@ const transporter = nodemailer.createTransport({
 });
  
  const mailOption = await transporter.sendMail({
-    from: process.env.user, // sender address
-    to: options.email, // list of receivers
-    subject: options.subject, // Subject line
-    text: options.text, // plain text body
-    html: options.html, // html body
+    from: process.env.user,
+    to: options.email,
+    subject: options.subject,
+    text: options.text,
+    html: options.html,
   });
 
 await transporter.sendMail(mailOption, (error)=>{
