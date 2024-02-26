@@ -47,7 +47,7 @@ exports.registerUser = async(req,res)=>{
             lastName: newUser.lastName 
         },process.env.JWT_KEY,{expiresIn:"6000s"})
             const name = `${newUser.firstName.toUpperCase()} . ${newUser.lastName.slice(0,1).toUpperCase()}`
-            const link = `http://localhost:${port}/verify-user/${newUser.id}/${token}`
+            const link = `${req.protocol}://${req.get('host')}/verify-user/${newUser.id}/${token}`
             const html = dynamicHtml(link, name)
             sendEmail({
             email:newUser.email,
