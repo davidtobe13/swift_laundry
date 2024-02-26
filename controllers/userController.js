@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
 const { resetFunc } = require("../helpers/resetHTML")
 const mainOrderModel = require("../models/mainOrderModel")
+const dynamicHtml = require("../helpers/html")
 
 exports.registerUser = async(req,res)=>{
     try {
@@ -35,6 +36,21 @@ exports.registerUser = async(req,res)=>{
             password:hashPass,
             confirmPassword:hashPass
         })
+        // generate a token for the user 
+        const token = jwt.sign({
+            userId:newUser._id,
+            email:newUser.email,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName 
+        },process.env.JWT_KEY,{expiresIn:"6000s"})
+            const name = `${newUser.firstName.toUpperCase()} . ${newUser.lastName.slice(0,1).toUpperCase()}`
+            const link = `http://localhost:${port}/verify-shop/${newUser.id}/${token}`
+            const html = dynamicHtml(link, name)
+            sendEmail({
+            email:newshop.email,
+            subject:"Click on the button below to verify your email", 
+            html
+            })
         // throw a failure message
         if(!newUser){
             return res.status(400).json({
@@ -153,9 +169,10 @@ exports.forgotPassword = async (req, res) => {
             });
         }
         else {
+            const name = checkUser.firstName + ' ' + checkUser.lastName
             const subject = 'Kindly reset your password'
             const link = `http://localhost:${port}/user-reset/${checkUser.id}`
-            const html = resetFunc(checkUser.fullName, link)
+            const html = resetFunc(name, link)
             sendEmail({
                 email: checkUser.email,
                 html,
@@ -466,8 +483,6 @@ exports.userSilverPlan = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
-
 
 
 // User subscription

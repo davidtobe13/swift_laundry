@@ -44,9 +44,9 @@ exports.registerShop = async(req,res)=>{
             email:newshop.email,
             businessName: newshop.businessName
         },process.env.JWT_KEY,{expiresIn:"6000s"})
-
+            const name = businessName
             const link = `http://localhost:${port}/verify-shop/${newshop.id}/${token}`
-            const html = dynamicHtml(link, businessName)
+            const html = dynamicHtml(link, name)
             sendEmail({
             email:newshop.email,
             subject:"Click on the button below to verify your email", 
@@ -174,9 +174,10 @@ exports.forgotShopPassword = async (req, res) => {
             });
         }
         else {
-            const subject = 'Kindly reset your password'
+            const name = checkShop.businessName
+            const subject = 'Password reset'
             const link = `http://localhost:${port}/shop-reset/${checkShop.id}`
-            const html = resetFunc(checkShop.businessName, link)
+            const html = resetFunc(name, link)
             sendEmail({
                 email: checkShop.email,
                 html,

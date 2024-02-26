@@ -26,9 +26,9 @@ exports.createUserOrder = async (req, res) => {
         }
         // Create a new main order document
         const newMainOrder = new mainOrderModel({
-            order: savedOrder._id, // Add the newly created order to the main order
-            total: totalAmount, // Set the total amount of the main order
-            user: userId // Set the user ID of the main order
+            order: savedOrder._id, 
+            total: totalAmount,
+            user: userId
         });
         user.orders.push(newMainOrder._id);
         newMainOrder.user = user._id
