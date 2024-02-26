@@ -32,7 +32,11 @@ const userSchema = new mongoose.Schema({
     },
     profileImage:{
         type:String,
-    },       
+    },
+    isAdmin:{
+        type: Boolean,
+        default: false
+    },    
     orders:[{
         type: mongoose.SchemaTypes.ObjectId,
         ref: "mainorder"

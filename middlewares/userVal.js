@@ -24,11 +24,11 @@ const userValidation = (req,res,next)=>{
         'string.empty': 'Phone number is required',
         'string.pattern.base': 'Phone number must be a valid 11-digit number',
       }),
-    password: Joi.string().required().min(8).max(16).messages({
+    password: Joi.string().required().min(8).max(30).messages({
         'string.base': 'Password must be a string',
         'string.empty': 'Password is required',
         'string.min': 'Password must be min of 8 characters',
-        'string.max': 'Password must be max of 16 characters',
+        'string.max': 'Password must be max of 30 characters',
       }),
   
   });

@@ -5,6 +5,9 @@ const jwt = require("jsonwebtoken")
 const { resetFunc } = require("../helpers/resetHTML")
 const mainOrderModel = require("../models/mainOrderModel")
 const dynamicHtml = require("../helpers/html")
+const { sendEmail } = require("../helpers/email")
+const port = process.env.PORT 
+
 
 exports.registerUser = async(req,res)=>{
     try {
@@ -44,10 +47,10 @@ exports.registerUser = async(req,res)=>{
             lastName: newUser.lastName 
         },process.env.JWT_KEY,{expiresIn:"6000s"})
             const name = `${newUser.firstName.toUpperCase()} . ${newUser.lastName.slice(0,1).toUpperCase()}`
-            const link = `http://localhost:${port}/verify-shop/${newUser.id}/${token}`
+            const link = `http://localhost:${port}/verify-user/${newUser.id}/${token}`
             const html = dynamicHtml(link, name)
             sendEmail({
-            email:newshop.email,
+            email:newUser.email,
             subject:"Click on the button below to verify your email", 
             html
             })
