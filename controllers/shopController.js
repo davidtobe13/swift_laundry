@@ -45,7 +45,7 @@ exports.registerShop = async(req,res)=>{
             businessName: newshop.businessName
         },process.env.JWT_KEY,{expiresIn:"6000s"})
             const name = businessName
-            const link = `http://localhost:${port}/verify-shop/${newshop.id}/${token}`
+            const link = `${req.protocol}://${req.get('host')}/verify-shop/${newshop.id}/${token}`
             const html = dynamicHtml(link, name)
             sendEmail({
             email:newshop.email,
