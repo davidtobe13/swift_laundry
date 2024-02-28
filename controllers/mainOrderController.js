@@ -5,9 +5,14 @@ const userModel = require('../models/userModel');
 // Create a new order
 exports.createUserOrder = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const {userId} = req.user;
         const shopId = req.params.shopId;
-
+        const {
+            deliveryAddress,
+            pickupAddress,
+            deliveryDateTime,
+            pickupDateTime
+          } = req.body
         // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");
         if (!user) {
@@ -28,7 +33,11 @@ exports.createUserOrder = async (req, res) => {
         const newMainOrder = new mainOrderModel({
             order: savedOrder._id, 
             total: totalAmount,
-            user: userId
+            user: userId,
+            deliveryAddress, 
+            pickupAddress, 
+            deliveryDateTime, 
+            pickupDateTime
         });
         user.orders.push(newMainOrder._id);
         newMainOrder.user = user._id

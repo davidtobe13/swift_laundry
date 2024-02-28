@@ -33,7 +33,7 @@ const dynamicHtml=( link,name)=> {
               </tr><!-- end tr -->
               <tr>
               <td valign="middle" style="padding: 3em 0 2em 0;">
-                <img src="https://www.the-curve.africa/static/media/curve2.b90648ddd7482f82d25a.png" alt="" style="width: 300px; max-width: 600px; height: auto; margin: auto; display: block;">
+                <img src="https://res.cloudinary.com/dxodxmvdr/image/upload/v1709050377/wm8csyjqjzflkm9f5n29.png" alt="" style="width: 150px; max-width: 300px; height: auto; margin: auto; display: block;">
               </td>
               </tr><!-- end tr -->
                     <tr>

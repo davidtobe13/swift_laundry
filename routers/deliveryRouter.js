@@ -3,9 +3,9 @@ const { acceptDelivery, rescheduleDelivery } = require('../controllers/deliveryC
 const authenticate = require('../middlewares/authentication');
 const router = express.Router();
 
-router.post('/accept-delivery/:deliveryId', authenticate, acceptDelivery);
+router.post('/accept-delivery/:orderId', authenticate, acceptDelivery);
 
-router.post('/reschedule-delivery/:deliveryId', rescheduleDelivery);
+router.post('/reschedule-delivery/:orderId', rescheduleDelivery);
 
 
 module.exports = router;

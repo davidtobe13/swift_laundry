@@ -7,6 +7,7 @@ const mainOrderModel = require("../models/mainOrderModel")
 const dynamicHtml = require("../helpers/html")
 const { sendEmail } = require("../helpers/email")
 const port = process.env.PORT 
+const cloudinary = require('../utils/cloudinary')
 
 
 exports.registerUser = async(req,res)=>{
@@ -144,9 +145,9 @@ exports.signOut = async(req,res)=>{
             })
         }
         // get the users id
-        const id = req.user.userId
+        const userId = req.user.userId
         // find the user
-        const user = await userModel.findById(id)
+        const user = await userModel.findById(userId)
         // push the user to the black list and save
         user.blackList.push(token)
         await user.save()
@@ -236,8 +237,10 @@ exports.resetPassword = async (req, res) => {
     }
 
     exports.updateUser = async (req, res) => {
-        const userId = req.user.userId;
-        const id = req.params.id
+        try{
+        const {userId} = req.user
+        // const id = req.params.id
+        console.log(userId)
         const {
             firstName,
             lastName,
@@ -266,13 +269,12 @@ exports.resetPassword = async (req, res) => {
             updateObject.profileImage = profileImage;
         }
     
-        try {
             // Update the user document in the database
-            const updatedUser = await userModel.findByIdAndUpdate(id, updateObject, { new: true });
+            const updatedUser = await userModel.findByIdAndUpdate(userId, updateObject, { new: true });
     
             if (!updatedUser) {
                 return res.status(404).json({
-                    error: `User with not found`
+                    error: `User with id not found`
                 });
             }
     
@@ -280,18 +282,20 @@ exports.resetPassword = async (req, res) => {
                 message: 'Successfully updated your profile',
                 user: updatedUser
             });
+        
         } catch (error) {
             console.error('Error updating user:', error);
             res.status(500).json({
-                error: 'Internal server error'
+                error: `'Internal server error: ${error.message} `
             });
         }
-    };
-    
+    }
+
+
     exports.getAllOrders = async (req, res) =>{
         try{ 
             // Find user by ID
-            const userId = req.user.userId;
+            const {userId} = req.user;
             const user = await userModel.findById(userId);
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
@@ -319,7 +323,7 @@ exports.resetPassword = async (req, res) => {
     exports.getAllPendingOrders = async (req, res) => {
         try {
             // Find user by ID
-            const userId = req.user.userId;
+            const {userId} = req.user;
             const user = await userModel.findById(userId);
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
@@ -346,7 +350,7 @@ exports.resetPassword = async (req, res) => {
     exports.getAllCompletedOrders = async (req, res) => {
         try {
             // Find user by ID
-            const userId = req.user.userId;
+            const {userId} = req.user;
             const user = await userModel.findById(userId);
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
@@ -372,7 +376,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.getOneOrder = async(req, res) =>{
     try{
-        const userId = req.user.userId
+        const {userId} = req.user
         const orderId = req.params.orderId
 
         const user = await userModel.findById(userId)
@@ -402,7 +406,7 @@ exports.getOneOrder = async(req, res) =>{
 // Get One Shop
 exports.getOneShop = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const {userId} = req.user;
         const shopId = req.params.shopId;
 
         // Fetch user by ID and populate their orders
@@ -430,7 +434,7 @@ exports.getOneShop = async (req, res) => {
 // Get One Shop
 exports.getAllShop = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const {userId} = req.user;
 
         // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");

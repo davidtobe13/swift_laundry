@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken")
 const dynamicHtml = require("../helpers/html")
 const { sendEmail } = require("../helpers/email")
 const { resetFunc } = require("../helpers/resetHTML")
+const cloudinary = require('../utils/cloudinary')
 const port = process.env.PORT 
 
 exports.registerShop = async(req,res)=>{
@@ -176,7 +177,7 @@ exports.forgotShopPassword = async (req, res) => {
         else {
             const name = checkShop.businessName
             const subject = 'Password reset'
-            const link = `http://localhost:${port}/shop-reset/${checkShop.id}`
+            const link = `${req.protocol}://${req.get('host')}/shop-reset/${checkShop.id}`
             const html = resetFunc(name, link)
             sendEmail({
                 email: checkShop.email,
@@ -237,9 +238,13 @@ exports.resetShopPassword = async (req, res) => {
     }
     }
 
-    
-exports.updateShop = async (req, res) => {
-        const userId = req.user.userId;
+
+
+    exports.updateShop = async (req, res) => {
+        try{
+        const {userId} = req.user
+        // const id = req.params.id
+        console.log(userId)
         const {
             businessName,
             phoneNumber,
@@ -266,36 +271,36 @@ exports.updateShop = async (req, res) => {
             updateObject.profileImage = profileImage;
         }
     
-        try {
             // Update the user document in the database
             const updatedShop = await shopModel.findByIdAndUpdate(userId, updateObject, { new: true });
     
             if (!updatedShop) {
                 return res.status(404).json({
-                    error: `Shop with not found`
+                    error: `Shop not found`
                 });
             }
     
             res.status(200).json({
                 message: 'Successfully updated your profile',
-                data: updatedShop
+                user: updatedShop
             });
+        
         } catch (error) {
             console.error('Error updating shop:', error);
             res.status(500).json({
-                error: 'Internal server error'
+                error: `'Internal server error: ${error.message} `
             });
         }
-    };
+    }
     
 
     
     exports.getShopOrders = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const {userId} = req.user;
         
         // Find the shop by its ID
-        const shop = await shopModel.findById(shopId).populate('users');
+        const shop = await shopModel.findById(userId).populate('users');
 
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
@@ -323,10 +328,10 @@ exports.updateShop = async (req, res) => {
 
 exports.getShopPendingOrders = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const {userId} = req.user;
         
         // Find the shop by its ID
-        const shop = await shopModel.findById(shopId).populate('users');
+        const shop = await shopModel.findById(userId).populate('users');
 
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
@@ -362,10 +367,10 @@ exports.getShopPendingOrders = async (req, res) => {
 
 exports.getShopCompletedOrders = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const {userId} = req.user;
         
         // Find the shop by its ID
-        const shop = await shopModel.findById(shopId).populate('users');
+        const shop = await shopModel.findById(userId).populate('users');
 
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
@@ -401,17 +406,17 @@ exports.getShopCompletedOrders = async (req, res) => {
 // Get One User
 exports.getOneUser = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
-        const userId = req.params.userId;
+        const {userId} = req.user;
+        const id = req.params.id;
 
         // Fetch shop by ID to ensure it exists
-        const shop = await shopModel.findById(shopId).populate('users');
+        const shop = await shopModel.findById(userId).populate('users');
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }
 
         // Find the user within the shop's users array
-        const user = shop.users.find(user => user._id.toString() === userId);
+        const user = shop.users.find(user => user._id.toString() === id);
         if (!user) {
             return res.status(404).json({ error: 'User not found in this shop' });
         }
@@ -429,10 +434,10 @@ exports.getOneUser = async (req, res) => {
 //Get all users
 exports.getAllUsers = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const {userId} = req.user;
 
         // Fetch shop by ID to ensure it exists
-        const shop = await shopModel.findById(shopId).populate('users');
+        const shop = await shopModel.findById(userId).populate('users');
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }
@@ -453,14 +458,14 @@ exports.getAllUsers = async (req, res) => {
 // User subscription
 exports.shopSilverPlan = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const {userId} = req.user;
         // Fetch user by ID and populate their orders
         const shop = await shopModel.findById(userId);
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }
-        const silver = user.subscribed
-        const subscribe = await userModel.findByIdAndUpdate(userId, {silver:'silver'}, {new: true});
+        const silver = shop.subscribed
+        const subscribe = await shopModel.findByIdAndUpdate(userId, {silver:'silver'}, {new: true});
 
         if(!subscribe){
             return res.status(403).json({
@@ -468,7 +473,7 @@ exports.shopSilverPlan = async (req, res) => {
             })
         }
         res.status(201).json({
-            message: 'You have successfully subscribed to this plan',
+            message: 'You have successfully subscribed to silver plan',
             data: subscribe
         });
     } catch (error) {
@@ -483,7 +488,7 @@ exports.shopSilverPlan = async (req, res) => {
 // User subscription
 exports.shopGoldPlan = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const {userId} = req.user;
 
         // Fetch user by ID and populate their orders
         const shop = await shopModel.findById(userId);
@@ -491,7 +496,7 @@ exports.shopGoldPlan = async (req, res) => {
             return res.status(404).json({ error: 'Shop not found' });
         }
         const gold = user.subscribed
-        const subscribe = await userModel.findByIdAndUpdate(userId, {gold:'gold'}, {new: true});
+        const subscribe = await shopModel.findByIdAndUpdate(userId, {gold:'gold'}, {new: true});
 
         if(!subscribe){
             return res.status(403).json({
@@ -499,7 +504,7 @@ exports.shopGoldPlan = async (req, res) => {
             })
         }
         res.status(201).json({
-            message: 'You have successfully subscribed to this plan',
+            message: 'You have successfully subscribed to gold plan',
             data: subscribe
         });
     } catch (error) {
@@ -511,11 +516,11 @@ exports.shopGoldPlan = async (req, res) => {
 
 exports.updateOrderStatusToCompleted = async (req, res) => {
     try {
-        const shopId = req.params.shopId;
+        const {userId} = req.userId;
         const orderId = req.params.orderId;
 
         // Find the shop by its ID
-        const shop = await shopModel.findById(shopId).populate('users');
+        const shop = await shopModel.findById(userId).populate('users');
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }

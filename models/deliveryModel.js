@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const deliverySchema = new mongoose.Schema({
-    orderId: {
+    orders: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: "mainorder"
     },
@@ -12,7 +12,6 @@ const deliverySchema = new mongoose.Schema({
     },
     deliveryDateTime: {
         type: Date,
-        default: Date.now // Default to current date and time
     }
 });
 

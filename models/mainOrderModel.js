@@ -1,4 +1,7 @@
 const mongoose = require("mongoose")
+const {DateTime} = require('luxon')
+
+const createdOn = DateTime.now().toLocaleString({weekday:"short",month:"short",day:"2-digit", year:"numeric", hour:"2-digit",minute:"2-digit"})
 
 const mainOrderSchema = new mongoose.Schema({
     order:[{
@@ -13,7 +16,23 @@ const mainOrderSchema = new mongoose.Schema({
         type:String,
         enum:['pending', 'completed'],
         default:"pending"
-    },     
+    },  
+    deliveryAddress: {
+        type:String,
+        required:true,
+    },
+    deliveryDateTime: {
+        type:Date,
+        required:true,
+    },
+    pickupAddress: {
+        type:String,
+        required:true,
+    },
+    pickupDateTime: {
+        type:Date,
+        required:true,
+    },
     user:{
         type: mongoose.SchemaTypes.ObjectId,
         ref: "user"
@@ -22,9 +41,9 @@ const mainOrderSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: "shop"
     },
-    date: {
-        type: Date,
-        default: Date.now
+    date:{
+        type:String,
+        default:createdOn
     }
 });
 
