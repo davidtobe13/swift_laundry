@@ -10,6 +10,11 @@ const port = process.env.PORT
 const cloudinary = require('../utils/cloudinary')
 const shopModel = require("../models/shopModel")
 const subscriptionModel = require("../models/subscriptionModel")
+const axios = require('axios');
+
+// Radius of the Earth in kilometers
+const EARTH_RADIUS_KM = 6371;
+const OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY
 
 
 exports.registerUser = async(req,res)=>{
@@ -433,30 +438,106 @@ exports.getOneShop = async (req, res) => {
 
 
 
-// Get One Shop
+
 exports.getAllShop = async (req, res) => {
     try {
-        const {userId} = req.user;
+        const { userId } = req.user;
 
         // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        // Fetch user by ID and populate their orders
-        const shop = await shopModel.find();
-        if (!shop) {
+
+        // Fetch all shops from the database
+        const shops = await shopModel.find();
+        if (!shops || shops.length === 0) {
             return res.status(404).json({ error: 'Shops not found' });
         }
-        res.status(201).json({
-            message: `There are ${shop.length} shops around you`,
-            data: shop
+
+        // Convert user's address to coordinates
+        const userCoordinates = await convertAddressToCoordinates(user.address);
+        if (!userCoordinates) {
+            // Request user to turn on device location
+            return res.status(400).json({ error: 'Please turn on your device location' });
+        }
+
+        // Convert shop addresses to coordinates and calculate distances
+        const shopsWithDistances = [];
+        for (const shop of shops) {
+            const shopCoordinates = await convertAddressToCoordinates(shop.address);
+            if (shopCoordinates) {
+                const distance = calculateDistance(userCoordinates, shopCoordinates);
+                const distanceMessage = `${distance.toFixed(2)} km away`;
+                shopsWithDistances.push({ shop: { ...shop.toObject(), distance: distanceMessage }, distance });
+            }
+        }
+
+        // Sort shops by distance (from nearest to farthest)
+        shopsWithDistances.sort((a, b) => a.distance - b.distance);
+
+        res.status(200).json({
+            message: `Found ${shopsWithDistances.length} shops around you`,
+            data: shopsWithDistances.map(({ shop }) => shop)
         });
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('Error fetching shops:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// Function to convert address to coordinates using OpenCage Geocoding API
+const convertAddressToCoordinates = async (address) => {
+    try {
+        const response = await axios.get('https://api.opencagedata.com/geocode/v1/json', {
+            params: {
+                q: address,
+                key: OPENCAGE_API_KEY
+            }
+        });
+        const { results } = response.data;
+        if (results.length > 0) {
+            const { lat, lng } = results[0].geometry;
+            return { lat, lng };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error converting address to coordinates:', error);
+        return null;
+    }
+};
+
+// Function to calculate distance between two sets of coordinates using Haversine formula
+const calculateDistance = (coord1, coord2) => {
+    const { lat: lat1, lng: lon1 } = coord1;
+    const { lat: lat2, lng: lon2 } = coord2;
+
+    // Convert latitude and longitude from degrees to radians
+    const radLat1 = toRadians(lat1);
+    const radLon1 = toRadians(lon1);
+    const radLat2 = toRadians(lat2);
+    const radLon2 = toRadians(lon2);
+
+    // Calculate the change in coordinates
+    const deltaLat = radLat2 - radLat1;
+    const deltaLon = radLon2 - radLon1;
+
+    // Apply Haversine formula
+    const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+              Math.cos(radLat1) * Math.cos(radLat2) *
+              Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = EARTH_RADIUS_KM * c;
+
+    return distance;
+};
+
+// Function to convert degrees to radians
+const toRadians = (degrees) => {
+    return degrees * (Math.PI / 180);
+};
+
+
 
 
 

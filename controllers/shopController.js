@@ -510,7 +510,7 @@ exports.shopGoldPlan = async (req, res) => {
 };
 
 
-// User Gold subscription
+// User Silver subscription
 exports.shopSilverPlan = async (req, res) => {
     try {
         const { userId } = req.user;
@@ -529,12 +529,12 @@ exports.shopSilverPlan = async (req, res) => {
             shopSubscription = new shopSubscriptionModel({
                 plan: 'silver',
                 shop: myShop._id,
-                price: 200000
+                price: 20000
             });
         } else {
             // Calculate expiration date (364 days from the current date)
             const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 363);
+            expirationDate.setDate(expirationDate.getDate() + 30);
 
             // Check if the subscription has expired
             const currentDate = new Date();
@@ -546,7 +546,7 @@ exports.shopSilverPlan = async (req, res) => {
             // Update shop subscription to silver plan with expiration date
             shopSubscription.plan = 'silver';
             shopSubscription.date = expirationDate;
-            shopSubscription.price = 200000;
+            shopSubscription.price = 20000;
 
         }
 
