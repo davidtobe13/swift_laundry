@@ -8,6 +8,8 @@ const dynamicHtml = require("../helpers/html")
 const { sendEmail } = require("../helpers/email")
 const port = process.env.PORT 
 const cloudinary = require('../utils/cloudinary')
+const shopModel = require("../models/shopModel")
+const subscriptionModel = require("../models/subscriptionModel")
 
 
 exports.registerUser = async(req,res)=>{
@@ -458,71 +460,165 @@ exports.getAllShop = async (req, res) => {
 
 
 
-// User subscription
+// User silver subscription
 exports.userSilverPlan = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const { userId } = req.user;
         const shopId = req.params.shopId;
 
-        // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({
+                error: 'User not found'
+            });
         }
-        // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(shopId);
-        if (!shop) {
-            return res.status(404).json({ error: 'Shop not found' });
-        }
-        const silver = user.subscribed
-        const subscribe = await userModel.findByIdAndUpdate(userId, {silver:'silver'}, {new: true});
 
-        if(!subscribe){
-            return res.status(403).json({
-                error: 'Unable to subscribe for this plan'
-            })
+        const myShop = await shopModel.findById(shopId);
+        if (!myShop) {
+            return res.status(404).json({
+                error: 'Shop not found'
+            });
         }
-        res.status(201).json({
-            message: 'You have successfully subscribed to this plan',
-            data: subscribe
+
+        // Find existing subscription or create a new one
+        let subscription = await subscriptionModel.findOne({ user: userId, shop: shopId });
+        if (!subscription) {
+            // Create a new subscription if none exists
+            subscription = new subscriptionModel({
+                plan: 'silver',
+                user: userId,
+                shop: shopId,
+                price: 22000,
+                date: new Date().toLocaleString()
+            });
+        } else {
+            // Calculate expiration date (30 days from the current date)
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 30);
+
+            // Check if the subscription has expired
+            const currentDate = new Date();
+            if (subscription.plan === 'silver' && subscription.date && new Date(subscription.date) < currentDate) {
+                // Subscription has expired, set plan to null
+                subscription.plan = null;
+            }
+
+            // Update subscription to silver plan with expiration date
+            subscription.plan = 'silver';
+            subscription.date = expirationDate;
+            subscription.price = 22000;
+
+        }
+
+        // Calculate total order amount from the day of subscription
+        const subscriptionDate = new Date(subscription.date);
+        let totalOrderAmount = 0;
+        for (const order of user.orders) {
+            // Consider orders placed after the subscription date
+            if (new Date(order.createdAt) >= subscriptionDate) {
+                totalOrderAmount += order.total;
+            }
+        }
+
+        // If the total order amount exceeds or equals the plan price, set plan to null
+        if (totalOrderAmount >= subscription.price+2000) {
+            subscription.plan = null;
+        }
+
+        // push the subscription to the shop and Save the subscription
+        myShop.subscribedUsers.push(subscription);
+        await myShop.save()
+        await subscription.save();
+
+        res.status(200).json({
+            message: 'Successfully subscribed to silver plan for the shop',
+            data: subscription
         });
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('Error subscribing to silver plan for the shop:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 
-// User subscription
+
+
+// User gold subscription
 exports.userGoldPlan = async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const { userId } = req.user;
         const shopId = req.params.shopId;
 
-        // Fetch user by ID and populate their orders
         const user = await userModel.findById(userId).populate("orders");
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({
+                error: 'User not found'
+            });
         }
-        // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(shopId);
-        if (!shop) {
-            return res.status(404).json({ error: 'Shop not found' });
-        }
-        const gold = user.subscribed
-        const subscribe = await userModel.findByIdAndUpdate(userId, {gold:'gold'}, {new: true});
 
-        if(!subscribe){
-            return res.status(403).json({
-                error: 'Unable to subscribe for this plan'
-            })
+        const myShop = await shopModel.findById(shopId);
+        if (!myShop) {
+            return res.status(404).json({
+                error: 'Shop not found'
+            });
         }
-        res.status(201).json({
-            message: 'You have successfully subscribed to this plan',
-            data: subscribe
+
+        // Find existing subscription or create a new one
+        let subscription = await subscriptionModel.findOne({ user: userId, shop: shopId });
+        if (!subscription) {
+            // Create a new subscription if none exists
+            subscription = new subscriptionModel({
+                plan: 'gold',
+                user: userId,
+                shop: shopId,
+                price: 40000,
+                date: new Date().toLocaleString()
+            });
+        } else {
+            // Calculate expiration date (30 days from the current date)
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 30);
+
+            // Check if the subscription has expired
+            const currentDate = new Date();
+            if (subscription.plan === 'gold' && subscription.date && new Date(subscription.date) < currentDate) {
+                // Subscription has expired, set plan to null
+                subscription.plan = null;
+            }
+
+            // Update subscription to gold plan with expiration date
+            subscription.plan = 'gold';
+            subscription.date = expirationDate;
+            subscription.price = 40000;
+
+        }
+
+        // Calculate total order amount from the day of subscription
+        const subscriptionDate = new Date(subscription.date);
+        let totalOrderAmount = 0;
+        for (const order of user.orders) {
+            // Consider orders placed after the subscription date
+            if (new Date(order.createdAt) >= subscriptionDate) {
+                totalOrderAmount += order.total;
+            }
+        }
+
+        // If the total order amount exceeds or equals the plan price, set plan to null
+        if (totalOrderAmount >= subscription.price+3000) {
+            subscription.plan = null;
+        }
+
+        // push the subscription to the shop and Save the subscription
+        myShop.subscribedUsers.push(subscription);
+        await myShop.save()
+        await subscription.save();
+
+        res.status(200).json({
+            message: 'Successfully subscribed to gold plan for the shop',
+            data: subscription
         });
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('Error subscribing to gold plan for the shop:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

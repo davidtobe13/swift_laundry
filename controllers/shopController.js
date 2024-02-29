@@ -6,6 +6,7 @@ const dynamicHtml = require("../helpers/html")
 const { sendEmail } = require("../helpers/email")
 const { resetFunc } = require("../helpers/resetHTML")
 const cloudinary = require('../utils/cloudinary')
+const shopSubscriptionModel = require("../models/shopSubscriptionModel")
 const port = process.env.PORT 
 
 exports.registerShop = async(req,res)=>{
@@ -455,63 +456,115 @@ exports.getAllUsers = async (req, res) => {
 
 
 
-// User subscription
-exports.shopSilverPlan = async (req, res) => {
-    try {
-        const {userId} = req.user;
-        // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(userId);
-        if (!shop) {
-            return res.status(404).json({ error: 'Shop not found' });
-        }
-        const silver = shop.subscribed
-        const subscribe = await shopModel.findByIdAndUpdate(userId, {silver:'silver'}, {new: true});
-
-        if(!subscribe){
-            return res.status(403).json({
-                error: 'Unable to subscribe for this plan'
-            })
-        }
-        res.status(201).json({
-            message: 'You have successfully subscribed to silver plan',
-            data: subscribe
-        });
-    } catch (error) {
-        console.error('Error creating order:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-
-
-
-// User subscription
+// User Gold subscription
 exports.shopGoldPlan = async (req, res) => {
     try {
-        const {userId} = req.user;
+        const { userId } = req.user;
 
-        // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(userId);
-        if (!shop) {
-            return res.status(404).json({ error: 'Shop not found' });
+        const myShop = await shopModel.findById(userId);
+        if(!myShop){
+            return res.status(404).json({
+                error: 'Shop not found'
+            });
         }
-        const gold = user.subscribed
-        const subscribe = await shopModel.findByIdAndUpdate(userId, {gold:'gold'}, {new: true});
 
-        if(!subscribe){
-            return res.status(403).json({
-                error: 'Unable to subscribe for this plan'
-            })
+        // Find existing shop subscription or create a new one
+        let shopSubscription = await shopSubscriptionModel.findOne({ shop: userId });
+        if (!shopSubscription) {
+            // Create a new shop subscription if none exists
+            shopSubscription = new shopSubscriptionModel({
+                plan: 'gold',
+                shop: myShop._id,
+                price: 200000
+            });
+        } else {
+            // Calculate expiration date (364 days from the current date)
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 363);
+
+            // Check if the subscription has expired
+            const currentDate = new Date();
+            if (shopSubscription.plan === 'gold' && shopSubscription.date && new Date(shopSubscription.date) < currentDate) {
+                // Subscription has expired, set plan to null
+                shopSubscription.plan = null;
+            }
+
+            // Update shop subscription to gold plan with expiration date
+            shopSubscription.plan = 'gold';
+            shopSubscription.date = expirationDate;
+            shopSubscription.price = 200000;
+
         }
-        res.status(201).json({
-            message: 'You have successfully subscribed to gold plan',
-            data: subscribe
+
+        // Save the shop subscription
+        await shopSubscription.save();
+
+        res.status(200).json({
+            message: 'Successfully subscribed to gold plan',
+            data: shopSubscription
         });
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('Error subscribing to gold plan:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+// User Gold subscription
+exports.shopSilverPlan = async (req, res) => {
+    try {
+        const { userId } = req.user;
+
+        const myShop = await shopModel.findById(userId);
+        if(!myShop){
+            return res.status(404).json({
+                error: 'Shop not found'
+            });
+        }
+
+        // Find existing shop subscription or create a new one
+        let shopSubscription = await shopSubscriptionModel.findOne({ shop: userId });
+        if (!shopSubscription) {
+            // Create a new shop subscription if none exists
+            shopSubscription = new shopSubscriptionModel({
+                plan: 'silver',
+                shop: myShop._id,
+                price: 200000
+            });
+        } else {
+            // Calculate expiration date (364 days from the current date)
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 363);
+
+            // Check if the subscription has expired
+            const currentDate = new Date();
+            if (shopSubscription.plan === 'silver' && shopSubscription.date && new Date(shopSubscription.date) < currentDate) {
+                // Subscription has expired, set plan to null
+                shopSubscription.plan = null;
+            }
+
+            // Update shop subscription to silver plan with expiration date
+            shopSubscription.plan = 'silver';
+            shopSubscription.date = expirationDate;
+            shopSubscription.price = 200000;
+
+        }
+
+        // Save the shop subscription
+        await shopSubscription.save();
+
+        res.status(200).json({
+            message: 'Successfully subscribed to silver plan',
+            data: shopSubscription
+        });
+    } catch (error) {
+        console.error('Error subscribing to silver plan:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
 
 
 exports.updateOrderStatusToCompleted = async (req, res) => {

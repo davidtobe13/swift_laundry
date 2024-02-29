@@ -29,14 +29,13 @@ const shopSchema = new mongoose.Schema({
         type:Boolean,
         default:true
     },
-    features:[{
+    subscribedUsers:[{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: "features"
+        ref: "subscription"
     }],
     subscribed:{
-        type:String,
-        default:null,
-        enum: ['silver', 'gold']
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "shopSubscription"
     },
     profileImage:{
         type:String,

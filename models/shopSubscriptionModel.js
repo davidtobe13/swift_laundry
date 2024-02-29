@@ -3,15 +3,11 @@ const {DateTime} = require('luxon')
 
 const createdOn = DateTime.now().toLocaleString({weekday:"short",month:"short",day:"2-digit", year:"numeric", hour:"2-digit",minute:"2-digit"})
 
-const subscriptionSchema = new mongoose.Schema({
+const shopSubscriptionSchema = new mongoose.Schema({
     plan:{
         type:String,
         default:null,
         enum: ['silver', 'gold']
-    },
-    user:{
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: "user"
     },         
     shop:{
         type: mongoose.SchemaTypes.ObjectId,
@@ -27,6 +23,6 @@ const subscriptionSchema = new mongoose.Schema({
     }
 })
 
-const subscriptionModel = mongoose.model("subscription",subscriptionSchema)
+const shopSubscriptionModel = mongoose.model("shopSubscription",shopSubscriptionSchema)
 
-module.exports = subscriptionModel
+module.exports = shopSubscriptionModel
