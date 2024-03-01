@@ -17,6 +17,7 @@ const EARTH_RADIUS_KM = 6371;
 const OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY
 
 
+// Register user function
 exports.registerUser = async(req,res)=>{
     try {
 
@@ -54,6 +55,8 @@ exports.registerUser = async(req,res)=>{
             firstName: newUser.firstName,
             lastName: newUser.lastName 
         },process.env.JWT_KEY,{expiresIn:"6000s"})
+
+        // send verification email to the user
             const name = `${newUser.firstName.toUpperCase()} . ${newUser.lastName.slice(0,1).toUpperCase()}`
             const link = `${req.protocol}://${req.get('host')}/verify-user/${newUser.id}/${token}`
             const html = dynamicHtml(link, name)
@@ -299,6 +302,7 @@ exports.resetPassword = async (req, res) => {
     }
 
 
+    // get all orders made by a user
     exports.getAllOrders = async (req, res) =>{
         try{ 
             // Find user by ID
@@ -327,6 +331,8 @@ exports.resetPassword = async (req, res) => {
         }
     }
 
+
+    // get all pending orders made by the user
     exports.getAllPendingOrders = async (req, res) => {
         try {
             // Find user by ID
@@ -354,6 +360,7 @@ exports.resetPassword = async (req, res) => {
     };
     
 
+    // get all completed orders
     exports.getAllCompletedOrders = async (req, res) => {
         try {
             // Find user by ID
@@ -381,6 +388,7 @@ exports.resetPassword = async (req, res) => {
     };
 
 
+    // get one order made by the user
 exports.getOneOrder = async(req, res) =>{
     try{
         const {userId} = req.user
@@ -410,6 +418,7 @@ exports.getOneOrder = async(req, res) =>{
     }
 }
 
+
 // Get One Shop
 exports.getOneShop = async (req, res) => {
     try {
@@ -438,7 +447,7 @@ exports.getOneShop = async (req, res) => {
 
 
 
-
+// get all shops in order of distance from the users address
 exports.getAllShop = async (req, res) => {
     try {
         const { userId } = req.user;

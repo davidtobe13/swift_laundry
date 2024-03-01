@@ -9,6 +9,8 @@ const cloudinary = require('../utils/cloudinary')
 const shopSubscriptionModel = require("../models/shopSubscriptionModel")
 const port = process.env.PORT 
 
+
+// Register shop
 exports.registerShop = async(req,res)=>{
     try {
 
@@ -46,6 +48,8 @@ exports.registerShop = async(req,res)=>{
             email:newshop.email,
             businessName: newshop.businessName
         },process.env.JWT_KEY,{expiresIn:"6000s"})
+
+        // Send email to verify the shop
             const name = businessName
             const link = `${req.protocol}://${req.get('host')}/verify-shop/${newshop.id}/${token}`
             const html = dynamicHtml(link, name)
@@ -54,21 +58,24 @@ exports.registerShop = async(req,res)=>{
             subject:"Click on the button below to verify your email", 
             html
             })
+
         // throw a failure message
         if(!newshop){
             return res.status(400).json({
                 error:"error creating your account"
             })
         }
-        if(shopModel.isVerified === false){
-            return res.status(400).json({
-                error: 'Unable to create this user'
-            })
-        }
-        // success message
+        //check if the user is verified and throw an error message
+        // if(shopModel.isVerified === false){
+        //     return res.status(400).json({
+        //         error: 'Unable to create this user'
+        //     })
+        // }
+        // success message for the verified shop
         res.status(200).json({
-            message:`HELLO👋 ${newshop.businessName.toUpperCase()} YOUR ACCOUNT HAS BEEN CREATED SUCCESSFULLY🎉🥳`,
-            data: newshop 
+            message:`Welcome, ${newshop.businessName.toUpperCase()}. You have succesfully registered your business.`,
+            data: newshop,
+            token
         })
 
     } catch (err) {
@@ -78,9 +85,10 @@ exports.registerShop = async(req,res)=>{
     }
 }
 
+
+// function to verify the shop
 exports.verifyShop = async (req,res)=>{
-    try{
-       
+    try{  
           const  id = req.params.id
           const token = req.params.token
           
@@ -99,9 +107,11 @@ exports.verifyShop = async (req,res)=>{
     }
    
    }
-exports.signInShop = async(req,res)=>{
-    try {
 
+
+   // Sign in shop function
+   exports.signInShop = async (req,res)=>{
+    try {
         // get the requirement
         const {email,password} = req.body
         // check if the shop is existing on the platform
@@ -137,9 +147,9 @@ exports.signInShop = async(req,res)=>{
     }
 }
 
+// Shp sign out function
 exports.signOutShop = async(req,res)=>{
     try {
-
         // get the shops token
         const token = req.headers.authorization.split(' ')[1]
         if(!token){
@@ -240,7 +250,7 @@ exports.resetShopPassword = async (req, res) => {
     }
 
 
-
+// shop update function
     exports.updateShop = async (req, res) => {
         try{
         const {userId} = req.user
@@ -295,7 +305,7 @@ exports.resetShopPassword = async (req, res) => {
     }
     
 
-    
+    // get all shop orders
     exports.getShopOrders = async (req, res) => {
     try {
         const {userId} = req.user;
@@ -327,6 +337,7 @@ exports.resetShopPassword = async (req, res) => {
 };
 
 
+// get all shop pending orders
 exports.getShopPendingOrders = async (req, res) => {
     try {
         const {userId} = req.user;
@@ -366,6 +377,7 @@ exports.getShopPendingOrders = async (req, res) => {
 };
 
 
+// get all shop completed orders
 exports.getShopCompletedOrders = async (req, res) => {
     try {
         const {userId} = req.user;
@@ -404,7 +416,7 @@ exports.getShopCompletedOrders = async (req, res) => {
 };
 
    
-// Get One User
+// Get One User under the shop
 exports.getOneUser = async (req, res) => {
     try {
         const {userId} = req.user;
@@ -432,7 +444,8 @@ exports.getOneUser = async (req, res) => {
     }
 };
 
-//Get all users
+
+// Get all users under a shop
 exports.getAllUsers = async (req, res) => {
     try {
         const {userId} = req.user;
@@ -455,8 +468,7 @@ exports.getAllUsers = async (req, res) => {
 
 
 
-
-// User Gold subscription
+// Subscribe gold plan for shop
 exports.shopGoldPlan = async (req, res) => {
     try {
         const { userId } = req.user;
@@ -510,7 +522,8 @@ exports.shopGoldPlan = async (req, res) => {
 };
 
 
-// User Silver subscription
+
+// Subscribe silver plan for shop
 exports.shopSilverPlan = async (req, res) => {
     try {
         const { userId } = req.user;
@@ -565,8 +578,7 @@ exports.shopSilverPlan = async (req, res) => {
 
 
 
-
-
+// update user order to completed
 exports.updateOrderStatusToCompleted = async (req, res) => {
     try {
         const {userId} = req.userId;
