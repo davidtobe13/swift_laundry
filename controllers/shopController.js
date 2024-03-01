@@ -179,7 +179,7 @@ exports.signOutShop = async(req,res)=>{
 //Function for the user incase password is forgotten
 exports.forgotShopPassword = async (req, res) => {
     try {
-        const checkShop = await shopModel.findOne({ email: req.body.email });
+        const checkShop = await shopModel.findOne({ email: req.body.email.toLowerCase() });
         if (!checkShop) {
             return res.status(404).json({
                 message: 'Email does not exist'
