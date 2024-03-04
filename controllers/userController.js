@@ -85,6 +85,29 @@ exports.registerUser = async(req,res)=>{
 }
 
 
+exports.getOneUser = async (req, res) =>{
+    try{
+        const userId = res.locals.user
+        const user = await userModel.findById(userId._id)
+        if(!user){
+            return res.status(404).send({
+                error: `User not found`
+            })
+        }
+
+        res.status(200).json({
+            message: `User found ${user.firstName}`,
+            data: user
+        })
+
+    }catch(error){
+        res.status(500).json({
+            error: `Internal server error: ${error.message}`
+        })
+    }
+}
+
+
 exports.verifyUser = async (req,res)=>{
     try{
        
@@ -94,6 +117,8 @@ exports.verifyUser = async (req,res)=>{
           await jwt.verify(token, process.env.JWT_KEY )
 
        const updatedUser = await userModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
+       res.redirect ("https://swiftlaundry-app-beta.vercel.app/verifyEmail")
+
    
        res.status(200).json({
            message:`user with emmail:${updatedUser.email} is now verified`,
@@ -118,6 +143,11 @@ exports.signIn = async(req,res)=>{
                 error:"email does not exist"
             })
         }
+        if(userExist.isVerified === false){
+            return res.status(403).json({
+                error: `user is not verified. Click to enter email and resend verification message`
+            })
+        }
         // check for password
         const checkPassword = bcrypt.compareSync(password,userExist.password)
         if(!checkPassword){
@@ -140,6 +170,43 @@ exports.signIn = async(req,res)=>{
     } catch (err) {
         res.status(500).json({
             error: err.message
+        })
+    }
+}
+
+
+
+//resend verification message
+exports.reverifyUser = async (req, res) =>{
+    try{
+        const {email} = req.body
+        const newUser = await userModel.findOne({email})
+        if(!newUser){
+            return res.status(404).json({
+                error: `Shop with email: ${newUser.email} does not exists`
+            })
+        }       
+         // generate a token for the user 
+         const token = jwt.sign({
+            userId:newUser._id,
+            email:newUser.email,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName 
+        },process.env.JWT_KEY,{expiresIn:"6000s"})
+
+        // send verification email to the user
+            const name = `${newUser.firstName.toUpperCase()} . ${newUser.lastName.slice(0,1).toUpperCase()}`
+            const link = `${req.protocol}://${req.get('host')}/verify-user/${newUser.id}/${token}`
+            const html = dynamicHtml(link, name)
+            sendEmail({
+            email:newUser.email,
+            subject:"Click on the button below to verify your email", 
+            html
+            })
+    }
+    catch(error){
+        res.status(500).json({
+            error: `Internal error message: ${error.message}`
         })
     }
 }

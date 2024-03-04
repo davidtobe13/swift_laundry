@@ -90,7 +90,7 @@ exports.verifyShop = async (req,res)=>{
           await jwt.verify(token, process.env.JWT_KEY )
 
        const updatedUser = await shopModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
-       res.redirect ("https://www.google.com")
+       res.redirect ("https://swiftlaundry-app-beta.vercel.app/verifyEmails")
    
        res.status(200).json({
            message:`user with emmail:${updatedUser.email} is now verified`,
@@ -151,7 +151,7 @@ exports.verifyShop = async (req,res)=>{
 
 
 //resend verification message
-exports.reverify = async (req, res) =>{
+exports.reverifyShop = async (req, res) =>{
     try{
         const {email} = req.body
         const emailExist = await shopModel.findOne({email})
