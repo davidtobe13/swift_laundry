@@ -87,8 +87,9 @@ exports.registerUser = async(req,res)=>{
 
 exports.getOneUser = async (req, res) =>{
     try{
-        const userId = res.locals.user
-        const user = await userModel.findById(userId._id)
+        const userId = req.user.userId
+        console.log(userId)
+        const user = await userModel.findById(userId)
         if(!user){
             return res.status(404).send({
                 error: `User not found`
@@ -143,11 +144,11 @@ exports.signIn = async(req,res)=>{
                 error:"email does not exist"
             })
         }
-        if(userExist.isVerified === false){
-            return res.status(403).json({
-                error: `user is not verified. Click to enter email and resend verification message`
-            })
-        }
+        // if(userExist.isVerified === false){
+        //     return res.status(403).json({
+        //         error: `user is not verified. Click to enter email and resend verification message`
+        //     })
+        // }
         // check for password
         const checkPassword = bcrypt.compareSync(password,userExist.password)
         if(!checkPassword){
