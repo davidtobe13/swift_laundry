@@ -73,7 +73,7 @@ exports.registerUser = async(req,res)=>{
         }
         // success message
         res.status(200).json({
-            message:`HELLO👋 ${newUser.firstName.toUpperCase()} ${newUser.lastName.slice(0,1).toUpperCase()} YOUR ACCOUNT HAS BEEN CREATED SUCCESSFULLY🎉🥳`,
+            message:`HELLO, ${newUser.firstName.toUpperCase()} ${newUser.lastName.slice(0,1).toUpperCase()} YOUR ACCOUNT HAS BEEN CREATED SUCCESSFULLY`,
             data: newUser 
         })
 

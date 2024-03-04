@@ -65,12 +65,7 @@ exports.registerShop = async(req,res)=>{
                 error:"error creating your account"
             })
         }
-        //check if the user is verified and throw an error message
-        // if(shopModel.isVerified === false){
-        //     return res.status(400).json({
-        //         error: 'Unable to create this user'
-        //     })
-        // }
+
         // success message for the verified shop
         res.status(200).json({
             message:`Welcome, ${newshop.businessName.toUpperCase()}. You have succesfully registered your business.`,
@@ -95,10 +90,10 @@ exports.verifyShop = async (req,res)=>{
           await jwt.verify(token, process.env.JWT_KEY )
 
        const updatedUser = await shopModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
+       res.redirect ("https://www.google.com")
    
        res.status(200).json({
            message:`user with emmail:${updatedUser.email} is now verified`,
-           data: updatedUser
        })
     }catch(err){
        res.status(500).json({
@@ -128,6 +123,13 @@ exports.verifyShop = async (req,res)=>{
                 error:"incorrect password"
             })
         }
+
+        //check if the registered shop is verified
+        if(shopExist.isVerified === false){
+            return res.status(403).json({
+                error: "user is not verified. Click to enter email and resend verification message"
+            })
+        }
         // generate a token for the shop 
         const token = jwt.sign({
             userId:shopExist._id,
@@ -143,6 +145,41 @@ exports.verifyShop = async (req,res)=>{
     } catch (err) {
         res.status(500).json({
             error: err.message
+        })
+    }
+}
+
+
+//resend verification message
+exports.reverify = async (req, res) =>{
+    try{
+        const {email} = req.body
+        const emailExist = await shopModel.findOne({email})
+        if(!emailExist){
+            return res.status(404).json({
+                error: `Shop with email: ${emailExist.email} does not exists`
+            })
+        }       
+        // generate a token for the shop 
+        const token = jwt.sign({
+            userId:emailExist._id,
+            email:emailExist.email,
+            businessName: emailExist.businessName
+        },process.env.JWT_KEY,{expiresIn:"5mins"})
+
+        // Send email to verify the shop
+            const name = businessName
+            const link = `${req.protocol}://${req.get('host')}/verify-shop/${emailExist.id}/${token}`
+            const html = dynamicHtml(link, name)
+            sendEmail({
+            email:emailExist.email,
+            subject:"Click on the button below to verify your email", 
+            html
+            })
+    }
+    catch(error){
+        res.status(500).json({
+            error: `Internal error message: ${error.message}`
         })
     }
 }
