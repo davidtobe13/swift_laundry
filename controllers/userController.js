@@ -372,6 +372,39 @@ exports.resetPassword = async (req, res) => {
     }
 
 
+    exports.updateAddress = async (req, res) =>{
+        try{
+            const {userId} = req.user
+            const {address} = req.body
+
+            const user = await userModel.findById(userId)
+            if(!user){
+                return res.status(404).json({
+                    error: `User not found`
+                })
+            }
+            const myAddress = user.address
+            const newAddress = await userModel.findByIdAndUpdate(user, {myAddress:address}, {new:true})
+
+            if(!newAddress){
+                return res.status(403).json({
+                    error: `Add an address`
+                })
+            }
+            res.status(200).json({
+                message: 'Address added sucessfully',
+                data: newAddress
+            })
+
+
+        }catch(error){
+            res.status(500).json({
+                error: `Internal server error: ${error.message}`
+            })
+        }
+    }
+
+
     // get all orders made by a user
     exports.getAllOrders = async (req, res) =>{
         try{ 
