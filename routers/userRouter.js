@@ -20,7 +20,7 @@ router.get("/get-All-Pending-Orders",authenticate, getAllPendingOrders)
 router.get("/get-All-Completed-Orders",authenticate, getAllCompletedOrders)
 router.get("/get-One-Order/:orderId",authenticate, getOneOrder)
 router.get("/get-One-Shop/:shopId ", authenticate,getOneShop )
-router.get("/get-All-Shop", authenticate,getAllShop)
+router.get("/get-All-Shop", authenticate, getAllShop)
 router.get("/user-Silver-Plan",authenticate, userSilverPlan)
 router.get("/user-Gold-Plan",authenticate, userGoldPlan)
 
