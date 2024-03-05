@@ -523,30 +523,59 @@ exports.getOneOrder = async(req, res) =>{
 
 
 // Get One Shop
+// exports.getOneShop = async (req, res) => {
+//     try {
+//         const {userId} = req.user;
+//         const id = req.params.id;
+
+//         // Fetch user by ID and populate their orders
+//         const user = await userModel.findById(userId)
+//         if (!user) {
+//             return res.status(404).json({ error: 'User not found' });
+//         }
+//         // Fetch user by ID and populate their orders
+//         const shop = await shopModel.findById(id);
+//         if (!shop) {
+//             return res.status(404).json({ error: 'Shop not found' });
+//         }
+//         res.status(200).json({
+//             message: 'Shop Fatched successfully',
+//             data: shop
+//         });
+//     } catch (error) {
+//         console.error('Error creating order:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
+
 exports.getOneShop = async (req, res) => {
     try {
-        const {userId} = req.user;
-        const shopId = req.params.shopId;
+        const { userId } = req.user;
+        const id = req.params.id;
 
-        // Fetch user by ID and populate their orders
-        const user = await userModel.findById(userId)
+        // Fetch user by ID
+        const user = await userModel.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        // Fetch user by ID and populate their orders
-        const shop = await shopModel.findById(shopId);
+
+        // Fetch shop by ID
+        const shop = await shopModel.findById(id);
         if (!shop) {
             return res.status(404).json({ error: 'Shop not found' });
         }
-        res.status(201).json({
-            message: 'Shop Fatched successfully',
+
+        res.status(200).json({
+            message: 'Shop Fetched successfully',
             data: shop
         });
     } catch (error) {
-        console.error('Error creating order:', error);
+        console.error('Error fetching shop:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
 
