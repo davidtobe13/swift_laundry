@@ -39,6 +39,7 @@ const shopSchema = new mongoose.Schema({
     },
     profileImage:{
         type:String,
+        default: ""
     },
     users:[{
         type: mongoose.SchemaTypes.ObjectId,
