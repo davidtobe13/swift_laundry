@@ -144,6 +144,8 @@ exports.signIn = async(req,res)=>{
                 error:"email does not exist"
             })
         }
+        
+        //check if the user is verified
         // if(userExist.isVerified === false){
         //     return res.status(403).json({
         //         error: `user is not verified. Click to enter email and resend verification message`
@@ -539,6 +541,18 @@ exports.getAllShop = async (req, res) => {
             return res.status(400).json({ error: 'Please turn on your device location' });
         }
 
+        // let userCoordinates;
+        // // Check if user's location is available
+        // if (req.user.location) {
+        //     userCoordinates = req.user.location;
+        // } else {
+        //     // Convert user's address to coordinates
+        //     userCoordinates = await convertAddressToCoordinates(user.address);
+        //     if (!userCoordinates) {
+        //         // Request user to turn on device location
+        //         return res.status(400).json({ error: 'Please turn on your device location' });
+        //     }
+        // }
         // Convert shop addresses to coordinates and calculate distances
         const shopsWithDistances = [];
         for (const shop of shops) {
