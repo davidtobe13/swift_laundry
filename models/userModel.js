@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
     },
     address:{
         type:String,
+        default:"",
     },
     subscribed:{
         type:String,
