@@ -592,7 +592,7 @@ exports.getAllShop = async (req, res) => {
             const shopCoordinates = await convertAddressToCoordinates(shop.address);
             if (shopCoordinates) {
                 const distance = calculateDistance(userCoordinates, shopCoordinates);
-                const distanceMessage = `${distance.toFixed(2)} km away`;
+                const distanceMessage = `${distance.toFixed(2)}km away`;
                 shopsWithDistances.push({ shop: { ...shop.toObject(), distance: distanceMessage }, distance });
             }
         }
@@ -746,6 +746,29 @@ exports.userSilverPlan = async (req, res) => {
 };
 
 
+exports.getShops = async (req, res) =>{
+    try{
+        const {userId} = req.user
+        const user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                error: `User not found`
+            })
+        }
+        const shop = await shopModel.find()
+        if (!shop) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+
+        res.status(200).json({
+            message: 'All shops fetched successfully',
+            data: shop
+        });
+    
+    }catch(error){
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
 
 
 // User gold subscription
