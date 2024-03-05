@@ -377,14 +377,14 @@ exports.resetPassword = async (req, res) => {
             const {userId} = req.user
             const {address} = req.body
 
-            const user = await userModel.findById(userId)
-            if(!user){
-                return res.status(404).json({
-                    error: `User not found`
-                })
-            }
-            const myAddress = user.address
-            const newAddress = await userModel.findByIdAndUpdate(user, {myAddress:address}, {new:true})
+            // const user = await userModel.findById(userId)
+            // if(!user){
+            //     return res.status(404).json({
+            //         error: `User not found`
+            //     })
+            // }
+            const myAddress = address
+            const newAddress = await userModel.findByIdAndUpdate(userId, myAddress, {new:true})
 
             if(!newAddress){
                 return res.status(403).json({
@@ -569,10 +569,10 @@ exports.getAllShop = async (req, res) => {
 
         // Convert user's address to coordinates
         const userCoordinates = await convertAddressToCoordinates(user.address);
-        if (!userCoordinates) {
-            // Request user to turn on device location
-            return res.status(400).json({ error: 'Please turn on your device location' });
-        }
+        // if (!userCoordinates) {
+        //     // Request user to turn on device location
+        //     return res.status(400).json({ error: 'Please turn on your device location' });
+        // }
 
         // let userCoordinates;
         // // Check if user's location is available
