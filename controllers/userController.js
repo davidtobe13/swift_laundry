@@ -529,7 +529,7 @@ exports.getOneShop = async (req, res) => {
         const shopId = req.params.shopId;
 
         // Fetch user by ID and populate their orders
-        const user = await userModel.findById(userId).populate("orders");
+        const user = await userModel.findById(userId)
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
