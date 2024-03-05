@@ -39,7 +39,7 @@ const shopSchema = new mongoose.Schema({
     },
     profileImage:{
         type:String,
-        default: ""
+        default: "https://cdn-icons-png.flaticon.com/512/6220/6220898.png"
     },
     users:[{
         type: mongoose.SchemaTypes.ObjectId,
