@@ -30,8 +30,8 @@ exports.createUserOrder = async (req, res) => {
                 pickupDateTime,
                 } = req.body;
 
-            const cartItems = await mainOrderModel.find({ cart: cart._id }).populate('item');
-
+            const cartItems = await mainOrderModel.find({ cart}).populate('item');
+console.log(cartItems)
             // Then, calculate the totals for each item in the cart
             const cartWithTotals = cartItems.map(cartItem => ({
                 item: cartItem.item._id,

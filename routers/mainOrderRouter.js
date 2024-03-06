@@ -3,7 +3,7 @@ const { createUserOrder, getAddedOrder, getAllMainOrders } = require('../control
 const { authenticate } = require('../middlewares/authentication');
 const router = express.Router();
 
-router.post('/create-user-order', authenticate, createUserOrder);
+router.post('/create-user-order/:shopId', authenticate, createUserOrder);
 router.get("/get-added-order", authenticate, getAddedOrder);
 router.get('/get-all-main-order', authenticate, getAllMainOrders)
 
