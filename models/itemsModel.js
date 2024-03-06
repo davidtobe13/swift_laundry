@@ -5,6 +5,10 @@ const itemSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    imagee:{
+        type:String,
+        required: true
+    },
     Price:{
         type:Number,
         default: 0
