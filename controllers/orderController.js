@@ -136,7 +136,7 @@ exports.getAllOrder = async (req, res) =>{
             })
         }
 
-        const order = await orderModel.find()
+        const order = await orderModel.find().populate("item")
         if(!order){
             return res.status(404).json({
                     error: `Order not found`
