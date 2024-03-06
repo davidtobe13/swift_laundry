@@ -21,7 +21,10 @@ exports.getCartItems = async (req, res) => {
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }
-        res.status(200).json(cart.cart);
+        res.status(200).json({
+            message: `Cart Items fetched`,
+            data: cart.cart
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
