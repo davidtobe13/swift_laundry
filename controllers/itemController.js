@@ -1,4 +1,5 @@
 const itemModel = require("../models/itemsModel");
+const userModel = require("../models/userModel");
 const cloudinary = require("../utils/cloudinary");
 
 // exports.items = async(req, res)=>{
@@ -59,7 +60,7 @@ exports.items = async (req, res) => {
 };
 
 
-exports.getOneItem = async(res, req)=>{
+exports.getOneItem = async(req, reresq)=>{
     try {
         const id = req.params.id
         const item = await itemModel.findOne(id)
@@ -68,26 +69,35 @@ exports.getOneItem = async(res, req)=>{
             data: item
         })
     } catch (error) {
-        res.status({
+      return  res.status(500).json({
             error: error.message
         })
     }
 }
 
-exports.getAllItem = async(res, req)=>{
+exports.getAllItem = async(req, res)=>{
     try {
+        const {userId} = req.user
+        
+        const user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                error: `User not found`
+            })
+        }
         const item = await itemModel.find()
-        return res.status(400).json({
+            res.status(400).json({
+                message: `Items fetched`,
             data: item
         })
     } catch (error) {
-        res.status({
+        res.status(500).json({
             error: error.message
         })
     }
 }
 
-exports.deleteItems = async(res, req)=>{
+exports.deleteItems = async(req, res)=>{
     try {
         const id = req.params.id
         const items = await itemModel.findByIdAndDelete(id)
@@ -97,7 +107,7 @@ exports.deleteItems = async(res, req)=>{
             data: items
         })
     } catch (error) {
-        res.status({
+        res.status(500).json({
             error: error.message
         })
     }
