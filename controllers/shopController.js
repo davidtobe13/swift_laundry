@@ -110,7 +110,7 @@ exports.verifyShop = async (req,res)=>{
         // get the requirement
         const {email,password} = req.body
         // check if the shop is existing on the platform
-        const shopExist = await shopModel.findOne({email:email})
+        const shopExist = await shopModel.findOne({email:email.toLowerCase()})
         if(!shopExist){
             return res.status(404).json({
                 error:"email does not exist"

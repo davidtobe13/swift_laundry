@@ -5,59 +5,74 @@ const userModel = require('../models/userModel');
 // Create a new order
 exports.createUserOrder = async (req, res) => {
     try {
-        const {userId} = req.user;
-        const shopId = req.params.shopId;
+        const {userId} = req.user
+        const shopId = req.params.shopId
+        const user = await userModel.findById(userId)
+
+        if(!user){
+            return res.status(404).json({
+                error: 'User not found'
+            })
+        }
+        const shop = await shopModel.findById(shopId)
+        if(!shop){
+            return res.status(404).json({
+                error: `User not found`
+            })
+        }
+
         const {
+                cart,
+                status,
+                deliveryAddress,
+                deliveryDateTime,
+                pickupAddress,
+                pickupDateTime,
+                } = req.body;
+
+            const cartItems = await mainOrderModel.find({ cart: cart._id }).populate('item');
+
+            // Then, calculate the totals for each item in the cart
+            const cartWithTotals = cartItems.map(cartItem => ({
+                item: cartItem.item._id,
+                quantity: cartItem.quantity,
+                total: cartItem.item.Price * cartItem.quantity
+            }));
+
+            const grandTotal = cartWithTotals.reduce((acc, curr) => acc + curr.total, 0);
+
+
+        // Create a new instance of mainOrderModel
+        const mainOrder = new mainOrderModel({
+            cart: cartWithTotals,
+            grandTotal,
+            status,
             deliveryAddress,
-            pickupAddress,
             deliveryDateTime,
-            pickupDateTime
-          } = req.body
-        // Fetch user by ID and populate their orders
-        const user = await userModel.findById(userId).populate("orders");
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        // Fetch shop by ID and populate their orders
-        const shop = await shopModel.findById(shopId).populate("orders");
-        if (!shop) {
-            return res.status(404).json({ error: 'Shop not found' });
-        }
-
-        // Calculate total amount for each order in the main order
-        let totalAmount = 0;
-        for (const order of user.orders) {
-            totalAmount += order.total;
-        }
-        // Create a new main order document
-        const newMainOrder = new mainOrderModel({
-            order: savedOrder._id, 
-            total: totalAmount,
-            user: userId,
-            deliveryAddress, 
-            pickupAddress, 
-            deliveryDateTime, 
-            pickupDateTime
+            pickupAddress,
+            pickupDateTime,
         });
-        user.orders.push(newMainOrder._id);
-        newMainOrder.user = user._id
-        shop.users.push(user._id);
 
-        await user.save();
-        await shop.save();
+        mainOrder.user = user._id
+        shop.users.push(user._id)
+        user.orders.push(mainOrder)
 
-        // Save the new main order
-        await newMainOrder.save();
+        await shop.save()
+        await user.save()
+        
+
+        const savedMainOrder = await mainOrder.save();
 
         res.status(201).json({
-            message: 'Order created successfully',
-            data: savedOrder
+            message: 'Main order created successfully',
+            data: savedMainOrder
         });
     } catch (error) {
-        console.error('Error creating order:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error creating main order:', error);
+        res.status(500).json({ error:'Internal server error' });
     }
 };
+
 
 
 exports.getAllMainOrders = async (req, res) =>{

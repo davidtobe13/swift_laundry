@@ -6,7 +6,7 @@ const shopRouter = require("./routers/shopRouter")
 const deliveryRouter = require("./routers/deliveryRouter")
 const itemRouter = require("./routers/itemRouter")
 const mainOrderRouter = require("./routers/mainOrderRouter")
-const orderRouter = require("./routers/orderRouter")
+// const orderRouter = require("./routers/orderRouter")
 
 
 // create an app instance of express
@@ -18,7 +18,7 @@ app.use(shopRouter)
 app.use(deliveryRouter)
 app.use(itemRouter)
 app.use(mainOrderRouter)
-app.use(orderRouter)
+// app.use(orderRouter)
 // check if the server is connected
 app.listen(process.env.PORT,()=>{
     console.log(`server is connected on port: ${process.env.PORT}`);

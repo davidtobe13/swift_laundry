@@ -4,11 +4,25 @@ const {DateTime} = require('luxon')
 const createdOn = DateTime.now().toLocaleString({weekday:"short",month:"short",day:"2-digit", year:"numeric", hour:"2-digit",minute:"2-digit"})
 
 const mainOrderSchema = new mongoose.Schema({
-    order:[{
+    user:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: "order"
-    }],  
+        ref: "user"
+    },
+    cart:[{
+        item:{
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "item"
+    },
+    quantity: {
+        type: Number,
+        default: 1
+    },
     total:{
+        type: Number,
+        default: 0
+    }
+    }],  
+    grandTotal:{
         type:Number,
         default:0
     },     
@@ -28,10 +42,6 @@ const mainOrderSchema = new mongoose.Schema({
     },
     pickupDateTime: {
         type:Date,
-    },
-    user:{
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: "user"
     },
     shop:{
         type: mongoose.SchemaTypes.ObjectId,
