@@ -109,6 +109,11 @@ exports.verifyShop = async (req,res)=>{
     try {
         // get the requirement
         const {email,password} = req.body
+        if (!email || !password){
+            return res.status(400).json({
+                error: 'Please enter all fields'
+            })
+        }
         // check if the shop is existing on the platform
         const shopExist = await shopModel.findOne({email:email.toLowerCase()})
         if(!shopExist){
@@ -134,7 +139,7 @@ exports.verifyShop = async (req,res)=>{
         const token = jwt.sign({
             userId:shopExist._id,
             email:shopExist.email,
-        },process.env.JWT_KEY,{expiresIn:"1d"})
+        },process.env.JWT_KEY,{expiresIn:"566d"})
 
         // throw a success message
         res.status(200).json({
@@ -142,7 +147,7 @@ exports.verifyShop = async (req,res)=>{
             data:token
         })
 
-    } catch (err) {
+    } catch (error) {
         res.status(500).json({
             error: err.message
         })
