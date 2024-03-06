@@ -1,6 +1,7 @@
 const mainOrderModel = require('../models/mainOrderModel');
 const shopModel = require('../models/shopModel');
 const userModel = require('../models/userModel');
+const itemsModel = require('../models/itemsModel')
 
 // Create a new order
 exports.createUserOrder = async (req, res) => {
@@ -30,17 +31,17 @@ exports.createUserOrder = async (req, res) => {
                 pickupDateTime,
                 } = req.body;
 
-            const cartItems = await mainOrderModel.find({ cart}).populate('item');
-console.log(cartItems)
+            // const cartItems = await itemsModel.findById(cart[0].item);
+
             // Then, calculate the totals for each item in the cart
-            const cartWithTotals = cartItems.map(cartItem => ({
-                item: cartItem.item._id,
+            const cartWithTotals = cart.map(cartItem => ({
+                item: cartItem.item,
                 quantity: cartItem.quantity,
-                total: cartItem.item.Price * cartItem.quantity
+                total: cartItem.Price * cartItem.quantity
             }));
 
             const grandTotal = cartWithTotals.reduce((acc, curr) => acc + curr.total, 0);
-
+// console.log(cartItems)
 
         // Create a new instance of mainOrderModel
         const mainOrder = new mainOrderModel({
@@ -54,18 +55,20 @@ console.log(cartItems)
         });
 
         mainOrder.user = user._id
+        const savedMainOrder = await mainOrder.save();
         shop.users.push(user._id)
-        user.orders.push(mainOrder)
+        
 
         await shop.save()
         await user.save()
         
 
-        const savedMainOrder = await mainOrder.save();
+        
+        user.orders.push(savedMainOrder)
 
         res.status(201).json({
             message: 'Main order created successfully',
-            data: savedMainOrder
+            data: savedMainOrder,
         });
     } catch (error) {
         console.error('Error creating main order:', error);

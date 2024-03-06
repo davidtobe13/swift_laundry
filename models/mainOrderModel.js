@@ -35,13 +35,13 @@ const mainOrderSchema = new mongoose.Schema({
         type:String,
     },
     deliveryDateTime: {
-        type:Date,
+        type:String,
     },
     pickupAddress: {
         type:String,
     },
     pickupDateTime: {
-        type:Date,
+        type:String,
     },
     shop:{
         type: mongoose.SchemaTypes.ObjectId,

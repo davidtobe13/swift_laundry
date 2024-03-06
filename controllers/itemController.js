@@ -60,7 +60,7 @@ exports.items = async (req, res) => {
 };
 
 
-exports.getOneItem = async(req, reresq)=>{
+exports.getOneItem = async(req, res)=>{
     try {
         const id = req.params.id
         const item = await itemModel.findOne(id)
