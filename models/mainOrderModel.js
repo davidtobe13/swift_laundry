@@ -8,19 +8,9 @@ const mainOrderSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: "user"
     },
-    cart:[{
-        item:{
+        item:[{
         type: mongoose.SchemaTypes.ObjectId,
         ref: "item"
-    },
-    quantity: {
-        type: Number,
-        default: 1
-    },
-    total:{
-        type: Number,
-        default: 0
-    }
     }],  
     grandTotal:{
         type:Number,
