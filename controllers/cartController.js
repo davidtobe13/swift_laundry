@@ -116,7 +116,7 @@ exports.addToCart = async (req, res) => {
         let cart = await cartModel.findOne({ user: userId }).populate('cart.item');
 
         if (!cart) {
-            cart = new cartModel({ user: userId, cart: [{ item: item._id, quantity }] });
+            cart = new cartModel({ user: userId, cart: [{ item: itemId, quantity }] });
         } else {
             const existingCartItem = cart.cart.find(cartItem => cartItem.item.toString() === itemId);
 
