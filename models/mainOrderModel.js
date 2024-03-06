@@ -19,19 +19,15 @@ const mainOrderSchema = new mongoose.Schema({
     },  
     deliveryAddress: {
         type:String,
-        required:true,
     },
     deliveryDateTime: {
         type:Date,
-        required:true,
     },
     pickupAddress: {
         type:String,
-        required:true,
     },
     pickupDateTime: {
         type:Date,
-        required:true,
     },
     user:{
         type: mongoose.SchemaTypes.ObjectId,
