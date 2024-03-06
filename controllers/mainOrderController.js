@@ -1,3 +1,4 @@
+const cartModel = require('../models/cartModel');
 const mainOrderModel = require('../models/mainOrderModel');
 const shopModel = require('../models/shopModel');
 // const shopModel = require('../models/shopModel');
@@ -9,6 +10,13 @@ const userModel = require('../models/userModel');
 exports.getCartItems = async (req, res) => {
     try {
         const { userId } = req.user;
+        const user = await userModel.findById(userId)
+
+        if(!user){
+            return res.status(404).json({
+                error: `User not found`
+            })
+        }
         const cart = await cartModel.findOne({ user: userId }).populate('cart.item');
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
