@@ -41,6 +41,13 @@ const userModel = require('../models/userModel');
 
 exports.createOrder = async (req, res) => {
     try {
+        const {userId}  = req.user
+        const user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                error: 'User not found'
+            })
+        }
         const { itemId, quantity} = req.body;
 
         // Fetch the item from the database
