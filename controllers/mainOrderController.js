@@ -23,7 +23,8 @@ exports.getCartItems = async (req, res) => {
         }
         res.status(200).json({
             message: `Cart Items fetched`,
-            data: cart.cart
+            data: cart.cart,
+            grandTotal:cart.grandTotal
         });
     } catch (error) {
         console.error(error);
