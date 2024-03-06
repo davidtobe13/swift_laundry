@@ -58,3 +58,35 @@ exports.createUserOrder = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+
+exports.getAddedOrder = async (req, res) =>{
+    try{
+        const {userId} = req.user
+        const id = req.params.id
+
+        const user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                error: `User not found`
+            })
+        }
+
+        const addedOrders = await mainOrderModel.findById(id)
+        if(!addedOrders){
+            return res.status(404).json({
+                error: `Order not found`
+            })
+        }
+        res.status(200).json({
+            message: `Users fetched successfully`,
+            data: addedOrders
+        })
+
+    }catch(error){
+        res.status(500).json({
+            error: `Internal server error: ${error.message}`
+        })
+    }
+}
