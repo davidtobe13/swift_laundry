@@ -86,7 +86,7 @@ exports.getAllItem = async(req, res)=>{
             })
         }
         const item = await itemModel.find()
-            res.status(400).json({
+            res.status(200).json({
                 message: `Items fetched`,
             data: item
         })
