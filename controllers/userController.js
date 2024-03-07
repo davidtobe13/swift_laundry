@@ -146,11 +146,11 @@ exports.signIn = async(req,res)=>{
         }
         
         // check if the user is verified
-        if(userExist.isVerified === false){
-            return res.status(403).json({
-                error: `user is not verified. Check your email and resend verification message`
-            })
-        }
+        // if(userExist.isVerified === false){
+        //     return res.status(403).json({
+        //         error: `user is not verified. Check your email and resend verification message`
+        //     })
+        // }
         // check for password
         const checkPassword = bcrypt.compareSync(password,userExist.password)
         if(!checkPassword){
