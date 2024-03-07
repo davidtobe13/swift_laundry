@@ -132,6 +132,7 @@ exports.createUserOrder = async (req, res) => {
 
         // Clear the cart after checkout
         cart.cart = [];
+        cart.grandTotal = 0;
         await cart.save();
 
         res.status(200).json({ 
