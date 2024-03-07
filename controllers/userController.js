@@ -414,7 +414,7 @@ exports.resetPassword = async (req, res) => {
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
-            const orders = await mainOrderModel.find().populate('order')
+            const orders = await mainOrderModel.find().populate('item')
 
             if(orders.length === 0){
                 return res.status(400).json({
