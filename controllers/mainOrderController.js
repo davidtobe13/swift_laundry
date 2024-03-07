@@ -121,7 +121,7 @@ exports.createUserOrder = async (req, res) => {
             deliveryDateTime,
             pickupAddress,
             pickupDateTime,
-            shop: shopId,
+            shop: shop._id,
         });
 
         await order.save();
