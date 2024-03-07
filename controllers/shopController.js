@@ -155,6 +155,29 @@ exports.verifyShop = async (req,res)=>{
 }
 
 
+exports.getThisShop = async (req, res) =>{
+    try{
+        const userId = req.user.userId
+        const shop = await shopModel.findById(userId)
+        if(!shop){
+            return res.status(404).send({
+                error: `shop not found`
+            })
+        }
+
+        res.status(200).json({
+            message: `shop found ${shop.businessName}`,
+            data: shop
+        })
+
+    }catch(error){
+        res.status(500).json({
+            error: `Internal server error: ${error.message}`
+        })
+    }
+}
+
+
 //resend verification message
 exports.reverifyShop = async (req, res) =>{
     try{

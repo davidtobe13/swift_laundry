@@ -1,11 +1,12 @@
 const router = require("express").Router()
-const {registerShop, verifyShop, signInShop, signOutShop, forgotShopPassword, resetShopPasswordPage, resetShopPassword, updateShop, getShopOrders, getShopPendingOrders, getShopCompletedOrders, getOneUser, getAllUsers, shopSilverPlan, shopGoldPlan, updateOrderStatusToCompleted, reverifyShop} = require('../controllers/shopController')
+const {registerShop, verifyShop, signInShop, signOutShop, forgotShopPassword, resetShopPasswordPage, resetShopPassword, updateShop, getShopOrders, getShopPendingOrders, getShopCompletedOrders, getOneUser, getAllUsers, shopSilverPlan, shopGoldPlan, updateOrderStatusToCompleted, reverifyShop, getThisShop} = require('../controllers/shopController')
 const { authenticate, authenticateAdmin } = require("../middlewares/authentication")
 const myValidation = require("../middlewares/validation")
 const upload = require("../utils/multer")
 
 
 router.post("/register-shop",myValidation, registerShop)
+router.post("/get-this-shop", getThisShop)
 router.post("/login-shop",signInShop)
 router.post("/logout",authenticate,signOutShop)
 router.get("/verify-shop/:id/:token", verifyShop)

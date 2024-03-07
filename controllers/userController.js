@@ -445,7 +445,7 @@ exports.resetPassword = async (req, res) => {
             }
             
             // Fetch all orders and populate the 'item' and 'shop' fields
-            const orders = await mainOrderModel.find().populate('item').populate('shop');
+            const orders = await mainOrderModel.find().populate('item').populate('shop').sort({ createdAt: -1 });;
     
             if (orders.length === 0) {
                 return res.status(400).json({
