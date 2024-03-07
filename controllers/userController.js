@@ -145,12 +145,12 @@ exports.signIn = async(req,res)=>{
             })
         }
         
-        //check if the user is verified
-        // if(userExist.isVerified === false){
-        //     return res.status(403).json({
-        //         error: `user is not verified. Click to enter email and resend verification message`
-        //     })
-        // }
+        // check if the user is verified
+        if(userExist.isVerified === false){
+            return res.status(403).json({
+                error: `user is not verified. Check your email and resend verification message`
+            })
+        }
         // check for password
         const checkPassword = bcrypt.compareSync(password,userExist.password)
         if(!checkPassword){
@@ -162,7 +162,7 @@ exports.signIn = async(req,res)=>{
         const token = jwt.sign({
             userId:userExist._id,
             email:userExist.email,
-        },process.env.JWT_KEY,{expiresIn:"1d"})
+        },process.env.JWT_KEY,{expiresIn:"2d"})
 
         // throw a success message
         res.status(200).json({

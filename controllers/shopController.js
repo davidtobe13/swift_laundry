@@ -130,11 +130,11 @@ exports.verifyShop = async (req,res)=>{
         }
 
         //check if the registered shop is verified
-        // if(shopExist.isVerified === false){
-        //     return res.status(403).json({
-        //         error: "user is not verified. Click to enter email and resend verification message"
-        //     })
-        // }
+        if(shopExist.isVerified === false){
+            return res.status(403).json({
+                error: "user is not verified. Check email and resend verification message"
+            })
+        }
         // generate a token for the shop 
         const token = jwt.sign({
             userId:shopExist._id,
