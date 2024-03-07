@@ -118,7 +118,7 @@ exports.verifyUser = async (req,res)=>{
           await jwt.verify(token, process.env.JWT_KEY )
 
        const updatedUser = await userModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
-       res.redirect ("https://swiftlaundry-app-beta.vercel.app/verifyEmail")
+       res.redirect ("https://swiftlaundry-app-beta.vercel.app/VerifyUser")
 
    
        res.status(200).json({

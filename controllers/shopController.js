@@ -90,7 +90,7 @@ exports.verifyShop = async (req,res)=>{
           await jwt.verify(token, process.env.JWT_KEY )
 
        const updatedUser = await shopModel.findByIdAndUpdate(id, {isVerified: true}, {new: true})
-       res.redirect ("https://swiftlaundry-app-beta.vercel.app/verifyEmails")
+       res.redirect ("https://swiftlaundry-app-beta.vercel.app/emailVerification")
    
        res.status(200).json({
            message:`user with emmail:${updatedUser.email} is now verified`,
