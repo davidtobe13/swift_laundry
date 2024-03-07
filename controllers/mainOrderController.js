@@ -35,8 +35,15 @@ exports.getCartItems = async (req, res) => {
 exports.createUserOrder = async (req, res) => {
     try {
         const { userId } = req.user;
+        
         const shopId = req.params.shopId;
 
+        const user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                error: `User not found`
+            })
+        }
         const shop = await shopModel.findById(shopId)
         if(!shop){
             return res.status(404).json({
@@ -58,10 +65,20 @@ exports.createUserOrder = async (req, res) => {
             pickupDateTime: cart.pickupDateTime,
         });
         await order.save();
+        user.orders.push(order._id)
+        order.shop = shopId
+
+        await user.save()
+        await shop.save()
+
+
         // Clear the cart after checkout
         cart.cart = [];
         await cart.save();
-        res.status(200).json({ message: 'Checkout successful' });
+        res.status(200).json({ 
+            message: 'Checkout successful',
+            data:order
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
