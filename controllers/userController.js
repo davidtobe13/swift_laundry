@@ -435,17 +435,47 @@ exports.resetPassword = async (req, res) => {
     // }
 
 
-    exports.getAllOrders = async (req, res) =>{
+    // exports.getAllOrders = async (req, res) =>{
+    //     try {
+    //         // Find user by ID
+    //         const { userId } = req.user;
+    //         const user = await userModel.findById(userId);
+    //         if (!user) {
+    //             return res.status(404).json({ error: 'User not found' });
+    //         }
+            
+    //         // Fetch all orders and populate the 'item' and 'shop' fields
+    //         const orders = await userModel.findById(userId).populate('orders').sort({ createdAt: -1 });;
+    
+    //         if (orders.length === 0) {
+    //             return res.status(400).json({
+    //                 error: "No orders placed yet"
+    //             });
+    //         }
+    
+    //         res.status(200).json({
+    //             message: `You have ${orders.length} orders`,
+    //             data: orders
+    //         });
+    //     } catch (error) {
+    //         console.error(error);
+    //         res.status(500).json({
+    //             error: 'Internal server error'
+    //         });
+    //     }
+    // };
+
+    exports.getAllOrders = async (req, res) => {
         try {
             // Find user by ID
             const { userId } = req.user;
-            const user = await userModel.findById(userId);
+            const user = await userModel.findById(userId).populate('orders').exec();
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
             
-            // Fetch all orders and populate the 'item' and 'shop' fields
-            const orders = await mainOrderModel.find().populate('item').populate('shop').sort({ createdAt: -1 });;
+            // Extract orders from the user object
+            const orders = user.orders;
     
             if (orders.length === 0) {
                 return res.status(400).json({
@@ -464,6 +494,7 @@ exports.resetPassword = async (req, res) => {
             });
         }
     };
+    
     
 
     // get all pending orders made by the user
@@ -536,12 +567,12 @@ exports.getOneOrder = async(req, res) =>{
             })
         }
 
-        const order = await mainOrderModel.findById(orderId).populate('order')
+        const order = await userModel.findById(orderId).populate('orders')
         if(!order){
             return res.status(404).json({
                 error: 'Order not found'
             })
-        }
+        } 
 
         res.status(200).json({
             message: 'Order fetched successfully',

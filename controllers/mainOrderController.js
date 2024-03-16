@@ -88,8 +88,8 @@ exports.getCartItems = async (req, res) => {
 
 exports.createUserOrder = async (req, res) => {
     try {
-        const { userId } = req.user;
-        const { shopId } = req.params;
+        const { userId } = req.user
+        const { shopId } = req.params
         const { 
             deliveryAddress, 
             deliveryDateTime, 
@@ -192,7 +192,7 @@ exports.getAddedOrder = async (req, res) =>{
             })
         }
         res.status(200).json({
-            message: `Users fetched successfully`,
+            message: `Orders fetched successfully`,
             data: addedOrders
         })
 
