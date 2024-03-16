@@ -469,7 +469,7 @@ exports.resetPassword = async (req, res) => {
         try {
             // Find user by ID
             const { userId } = req.user;
-            const user = await userModel.findById(userId).populate('orders').exec();
+            const user = await userModel.findById(userId).populate({ path: 'orders', populate: { path: 'shop' } }).exec();
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
