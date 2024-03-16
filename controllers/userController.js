@@ -478,7 +478,7 @@ exports.resetPassword = async (req, res) => {
             const orders = user.orders;
     
             if (orders.length === 0) {
-                return res.status(400).json({
+                return res.status(200).json({
                     error: "No orders placed yet"
                 });
             }
@@ -542,7 +542,7 @@ exports.getAllPendingOrders = async (req, res) => {
         const pendingOrders = user.orders.filter(order => order.status === 'pending');
 
         if (pendingOrders.length === 0) {
-            return res.status(404).json({ error: 'You have no pending orders' });
+            return res.status(200).json({ error: 'You have no pending orders' });
         }
 
         res.status(200).json({
@@ -599,7 +599,7 @@ exports.getAllCompletedOrders = async (req, res) => {
         const completedOrders = user.orders.filter(order => order.status === 'completed');
 
         if (completedOrders.length === 0) {
-            return res.status(404).json({ error: 'You have no completed orders' });
+            return res.status(200).json({ error: 'You have no completed orders' });
         }
 
         res.status(200).json({
