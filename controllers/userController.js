@@ -533,7 +533,7 @@ exports.getAllPendingOrders = async (req, res) => {
         const { userId } = req.user;
 
         // Find user and populate the 'orders' field
-        const user = await userModel.findById(userId).populate('orders').exec();
+        const user = await userModel.findById(userId).populate({ path: 'orders', populate: { path: 'shop' } }).exec();
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -590,7 +590,7 @@ exports.getAllCompletedOrders = async (req, res) => {
         const { userId } = req.user;
 
         // Find user and populate the 'orders' field
-        const user = await userModel.findById(userId).populate('orders').exec();
+        const user = await userModel.findById(userId).populate({ path: 'orders', populate: { path: 'shop' } }).exec();
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
