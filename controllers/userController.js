@@ -498,59 +498,120 @@ exports.resetPassword = async (req, res) => {
     
 
     // get all pending orders made by the user
-    exports.getAllPendingOrders = async (req, res) => {
-        try {
-            // Find user by ID
-            const {userId} = req.user;
-            const user = await userModel.findById(userId);
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
+    // exports.getAllPendingOrders = async (req, res) => {
+    //     try {
+    //         // Find user by ID
+    //         const {userId} = req.user
     
-            // Find pending orders
-            const pendingOrders = await mainOrderModel.find({ status: 'pending' }).populate('order');
+    //         // Find pending orders
+    //         const user = await userModel.findById(userId).populate('orders').find({ status: 'pending' }).exec();
+    //         if (!user) {
+    //             return res.status(404).json({ error: 'User not found' });
+    //         }
+            
+    //         // Extract orders from the user object
+    //         const pendingOrders = user.orders;
     
-            if (pendingOrders.length === 0) {
-                return res.status(404).json({ error: 'You have no pending orders' });
-            }
+    //         if (pendingOrders.length === 0) {
+    //             return res.status(404).json({ error: 'You have no pending orders' });
+    //         }
     
-            res.status(200).json({
-                message: `You have ${pendingOrders.length} pending orders`,
-                data: pendingOrders
-            });
-        } catch (error) {
-            console.error('Error getting pending orders:', error);
-            res.status(500).json({ error: 'Internal server error' });
-        }
-    };
+    //         res.status(200).json({
+    //             message: `You have ${pendingOrders.length} pending orders`,
+    //             data: pendingOrders
+    //         });
+    //     } catch (error) {
+    //         console.error('Error getting pending orders:', error);
+    //         res.status(500).json({ error: 'Internal server error' });
+    //     }
+    // };
     
 
-    // get all completed orders
-    exports.getAllCompletedOrders = async (req, res) => {
-        try {
-            // Find user by ID
-            const {userId} = req.user;
-            const user = await userModel.findById(userId);
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-    
-            // Find completed orders
-            const completedOrders = await mainOrderModel.find({ status: 'completed' }).populate('order');
-    
-            if (completedOrders.length === 0) {
-                return res.status(404).json({ error: 'You have no completed orders' });
-            }
-    
-            res.status(200).json({
-                message: `You have ${completedOrders.length} completed orders`,
-                data: completedOrders
-            });
-        } catch (error) {
-            console.error('Error getting completed orders:', error);
-            res.status(500).json({ error: 'Internal server error' });
+exports.getAllPendingOrders = async (req, res) => {
+    try {
+        // Find user by ID
+        const { userId } = req.user;
+
+        // Find user and populate the 'orders' field
+        const user = await userModel.findById(userId).populate('orders').exec();
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
         }
-    };
+        
+        // Filter pending orders
+        const pendingOrders = user.orders.filter(order => order.status === 'pending');
+
+        if (pendingOrders.length === 0) {
+            return res.status(404).json({ error: 'You have no pending orders' });
+        }
+
+        res.status(200).json({
+            message: `You have ${pendingOrders.length} pending orders`,
+            data: pendingOrders
+        });
+    } catch (error) {
+        console.error('Error getting pending orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+    // get all completed orders
+    // exports.getAllCompletedOrders = async (req, res) => {
+    //     try {
+    //         // Find user by ID
+    //         const {userId} = req.user;
+    //         const user = await userModel.findById(userId);
+    //         if (!user) {
+    //             return res.status(404).json({ error: 'User not found' });
+    //         }
+    
+    //         // Find completed orders
+    //         const completedOrders = await mainOrderModel.find({ status: 'completed' }).populate('order');
+    
+    //         if (completedOrders.length === 0) {
+    //             return res.status(404).json({ error: 'You have no completed orders' });
+    //         }
+    
+    //         res.status(200).json({
+    //             message: `You have ${completedOrders.length} completed orders`,
+    //             data: completedOrders
+    //         });
+    //     } catch (error) {
+    //         console.error('Error getting completed orders:', error);
+    //         res.status(500).json({ error: 'Internal server error' });
+    //     }
+    // };
+
+
+exports.getAllCompletedOrders = async (req, res) => {
+    try {
+        // Find user by ID
+        const { userId } = req.user;
+
+        // Find user and populate the 'orders' field
+        const user = await userModel.findById(userId).populate('orders').exec();
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // Filter pending orders
+        const completedOrders = user.orders.filter(order => order.status === 'completed');
+
+        if (completedOrders.length === 0) {
+            return res.status(404).json({ error: 'You have no completed orders' });
+        }
+
+        res.status(200).json({
+            message: `You have ${completedOrders.length} completed orders`,
+            data: completedOrders
+        });
+    } catch (error) {
+        console.error('Error getting completed orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 
 
     // get one order made by the user
