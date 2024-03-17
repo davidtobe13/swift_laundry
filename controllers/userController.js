@@ -713,6 +713,11 @@ exports.getAllShop = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
+        // If user doesn't have an address, request them to turn on device location
+        if (!user.address) {
+            return res.status(400).json({ error: 'Please turn on your device location' });
+        }
+
         // Fetch all shops from the database
         const shops = await shopModel.find();
         if (!shops || shops.length === 0) {
@@ -720,37 +725,26 @@ exports.getAllShop = async (req, res) => {
         }
 
         // Convert user's address to coordinates
-        const userCoordinates = await convertAddressToCoordinates(user.address);
-        // if (!userCoordinates) {
-        //     // Request user to turn on device location
-        //     return res.status(400).json({ error: 'Please turn on your device location' });
-        // }
+        let userCoordinates;
+        if (user.address) {
+            userCoordinates = await convertAddressToCoordinates(user.address);
+        }
 
-        // let userCoordinates;
-        // // Check if user's location is available
-        // if (req.user.location) {
-        //     userCoordinates = req.user.location;
-        // } else {
-        //     // Convert user's address to coordinates
-        //     userCoordinates = await convertAddressToCoordinates(user.address);
-        //     if (!userCoordinates) {
-        //         // Request user to turn on device location
-        //         return res.status(400).json({ error: 'Please turn on your device location' });
-        //     }
-        // }
         // Convert shop addresses to coordinates and calculate distances
         const shopsWithDistances = [];
         for (const shop of shops) {
             const shopCoordinates = await convertAddressToCoordinates(shop.address);
             if (shopCoordinates) {
-                const distance = calculateDistance(userCoordinates, shopCoordinates);
-                const distanceMessage = `${distance.toFixed(2)}km away`;
+                const distance = userCoordinates ? calculateDistance(userCoordinates, shopCoordinates) : null;
+                const distanceMessage = distance ? `${distance.toFixed(2)}km away` : 'Location not available';
                 shopsWithDistances.push({ shop: { ...shop.toObject(), distance: distanceMessage }, distance });
             }
         }
 
-        // Sort shops by distance (from nearest to farthest)
-        shopsWithDistances.sort((a, b) => a.distance - b.distance);
+        // Sort shops by distance (from nearest to farthest) if user location is available
+        if (userCoordinates) {
+            shopsWithDistances.sort((a, b) => a.distance - b.distance);
+        }
 
         res.status(200).json({
             message: `Found ${shopsWithDistances.length} shops around you`,
@@ -761,6 +755,59 @@ exports.getAllShop = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+
+
+
+
+// get all shops in order of distance from the users address
+// exports.getAllShop = async (req, res) => {
+//     try {
+//         const { userId } = req.user;
+
+//         // Fetch user by ID and populate their orders
+//         const user = await userModel.findById(userId).populate("orders");
+//         if (!user) {
+//             return res.status(404).json({ error: 'User not found' });
+//         }
+
+//         // Fetch all shops from the database
+//         const shops = await shopModel.find();
+//         if (!shops || shops.length === 0) {
+//             return res.status(404).json({ error: 'Shops not found' });
+//         }
+
+//         // Convert user's address to coordinates
+//         const userCoordinates = await convertAddressToCoordinates(user.address);
+//         if (!userCoordinates) {
+//             // Request user to turn on device location
+//             return res.status(400).json({ error: 'Please turn on your device location' });
+//         }
+
+//         // Convert shop addresses to coordinates and calculate distances
+//         const shopsWithDistances = [];
+//         for (const shop of shops) {
+//             const shopCoordinates = await convertAddressToCoordinates(shop.address);
+//             if (shopCoordinates) {
+//                 const distance = calculateDistance(userCoordinates, shopCoordinates);
+//                 const distanceMessage = `${distance.toFixed(2)}km away`;
+//                 shopsWithDistances.push({ shop: { ...shop.toObject(), distance: distanceMessage }, distance });
+//             }
+//         }
+
+//         // Sort shops by distance (from nearest to farthest)
+//         shopsWithDistances.sort((a, b) => a.distance - b.distance);
+
+//         res.status(200).json({
+//             message: `Found ${shopsWithDistances.length} shops around you`,
+//             data: shopsWithDistances.map(({ shop }) => shop)
+//         });
+//     } catch (error) {
+//         console.error('Error fetching shops:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
 
 // Function to convert address to coordinates using OpenCage Geocoding API
 const convertAddressToCoordinates = async (address) => {
@@ -776,7 +823,9 @@ const convertAddressToCoordinates = async (address) => {
             const { lat, lng } = results[0].geometry;
             return { lat, lng };
         }
+
         return null;
+
     } catch (error) {
         console.error('Error converting address to coordinates:', error);
         return null;
